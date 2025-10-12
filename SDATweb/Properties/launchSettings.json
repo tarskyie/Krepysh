@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SDATweb (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SDATweb (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
