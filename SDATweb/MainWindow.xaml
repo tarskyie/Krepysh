@@ -75,7 +75,7 @@
                 <TextBox x:Name="iconBox" Width="256"/>
                 <Button Margin="10, 0, 0, 0" Click="SelectIcon">📂</Button>
             </StackPanel>
-            <CheckBox x:Name="indexToggle" Content="index.html redirects to the first page (if present)"/>
+            <CheckBox x:Name="indexToggle" Content="index.html redirects to the first page (if present)" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
                 <Button Click="AddAsset">Add</Button>
                 <Button Click="ClearAssets">Clear assets</Button>

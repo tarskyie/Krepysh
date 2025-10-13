@@ -5,7 +5,7 @@ VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDATweb", "SDATweb\SDATweb.csproj", "{9D9F53CF-3780-456F-B6F0-D148A43AA477}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{7C248C04-067A-42E7-98D3-BB56B8996521}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrepyshLocalServer", "WebApplication1\KrepyshLocalServer.csproj", "{7C248C04-067A-42E7-98D3-BB56B8996521}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

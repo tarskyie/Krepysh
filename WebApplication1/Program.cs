@@ -1,6 +1,6 @@
 using Microsoft.Extensions.FileProviders;
 
-namespace WebApplication1
+namespace KrepyshLocalServer
 {
     class Program
     {
@@ -9,8 +9,9 @@ namespace WebApplication1
             // configure folder and port
             string contentRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\site");
             int port = 5500;
+            bool useBrowser = false;
 
-            (contentRoot, port) = ParseArgs(args, contentRoot, port);
+            (contentRoot, port, useBrowser) = ParseArgs(args, contentRoot, port, useBrowser);
 
             var provider = new PhysicalFileProvider(contentRoot);
 
@@ -20,14 +21,17 @@ namespace WebApplication1
 
             var app = builder.Build();
 
-            // directory browser will show up if no 
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions
+            // directory browser will show up if needed
+            if (useBrowser)
             {
-                FileProvider = provider,
-                RequestPath = ""
-            });
+                app.UseDirectoryBrowser(new DirectoryBrowserOptions
+                {
+                    FileProvider = provider,
+                    RequestPath = ""
+                });
+            }
 
-            app.UseStatusCodePagesWithReExecute("404.html");
+            app.UseStatusCodePagesWithReExecute("/404.html");
 
             app.UseDefaultFiles(new DefaultFilesOptions
             {
@@ -41,13 +45,16 @@ namespace WebApplication1
                 RequestPath = ""
             });
 
+            Console.WriteLine($"*SUC http://localhost:{port}");
+
             app.Run();
         }
 
-        static (string folder, int port) ParseArgs(string[] args, string defaultFolder, int defaultPort)
+        static (string folder, int port, bool useBrowser) ParseArgs(string[] args, string defaultFolder, int defaultPort, bool defaultBrowser)
         {
             string folder = defaultFolder;
             int port = defaultPort;
+            bool useBrowser = defaultBrowser;
 
             for (int i = 0; i < args.Length - 1; i++)
             {
@@ -60,10 +67,13 @@ namespace WebApplication1
                         if (int.TryParse(args[i + 1], out int parsedPort))
                             port = parsedPort;
                         break;
+                    case "-browser":
+                        useBrowser = true; 
+                        break;
                 }
             }
 
-            return (folder, port);
+            return (folder, port, useBrowser);
         }
 
     }

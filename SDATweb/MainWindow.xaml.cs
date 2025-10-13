@@ -26,6 +26,7 @@ namespace SDATweb
         private string appName = "My Website";
         private string deployFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site";
         private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\assets";
+        private int appPort = 5500;
 
         public MainWindow()
         {
@@ -343,9 +344,11 @@ namespace SDATweb
             processLauncher.GenericStartProcess("explorer.exe", deployFolder);
         }
 
-        private void OpenIndex(object sender, RoutedEventArgs e)
+        private async void OpenIndex(object sender, RoutedEventArgs e)
         {
-            processLauncher.GenericStartProcess(edgePath, deployFolder);
+            string index = await StartServer();
+
+            processLauncher.GenericStartProcess(edgePath, index);
         }
 
         private async void SelectIcon(object sender, RoutedEventArgs e)
@@ -384,6 +387,31 @@ namespace SDATweb
             }
 
             return res;
+        }
+
+        private async Task<string> StartServer()
+        {
+            Process serverProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "LocalServer\\KrepyshLocalServer.exe", 
+                    Arguments = $"-port {appPort} -folder {deployFolder}", 
+                    RedirectStandardOutput = true, 
+                    UseShellExecute = false, 
+                    CreateNoWindow = true 
+                }
+            };
+            serverProcess.Start();
+
+            string? response = await serverProcess.StandardOutput.ReadLineAsync();
+
+            if (response.StartsWith("*SUC "))
+            {
+                return response.Substring(5);
+            }
+
+            return "failed";
         }
     }
 }
