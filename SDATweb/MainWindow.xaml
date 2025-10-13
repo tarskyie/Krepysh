@@ -46,7 +46,7 @@
             <Button Click="NewPage">New page</Button>
             <Button Click="ClearItems">Clear</Button>
             <Button Click="OpenDirectory">Open folder</Button>
-            <TextBox x:Name="nameBox" Width="256" Height="32" VerticalAlignment="Center" Text="Website" PlaceholderText="Website Name" />
+            
             <TextBox x:Name="urlBox" Width="256" Height="32" VerticalAlignment="Center" Text="http://127.0.0.1:8080/v1/chat/completions" PlaceholderText="API url" />
             <TextBox x:Name="KeyBox" Width="128" Height="32" VerticalAlignment="Center" Text="none" PlaceholderText="API key" />
         </StackPanel>
@@ -70,17 +70,24 @@
         
         <!-- right side -->
         <StackPanel Grid.Row="2" Grid.Column="1" Padding="20,10,0,0">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Width="40" VerticalAlignment="Center">Icon</TextBlock>
-                <TextBox x:Name="iconBox" Width="256"/>
-                <Button Margin="10, 0, 0, 0" Click="SelectIcon">📂</Button>
-            </StackPanel>
+            <TextBox x:Name="nameBox" HorizontalAlignment="Stretch" Height="32" VerticalAlignment="Center" Text="Website" PlaceholderText="Website Name" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="40"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0" Width="40" VerticalAlignment="Center">Icon</TextBlock>
+                <TextBox x:Name="iconBox" Grid.Column="1" HorizontalAlignment="Stretch"/>
+                <Button Grid.Column="2" Margin="10, 0, 0, 0" Click="SelectIcon">📂</Button>
+            </Grid>
             <CheckBox x:Name="indexToggle" Content="index.html redirects to the first page (if present)" IsChecked="True"/>
             <StackPanel Orientation="Horizontal">
                 <Button Click="AddAsset">Add</Button>
                 <Button Click="ClearAssets">Clear assets</Button>
             </StackPanel>
-            <ListBox x:Name="lb_assets" Width="512" Height="512" HorizontalAlignment="Left"/>
+            <ListBox x:Name="lb_assets" Height="256" HorizontalAlignment="Stretch"/>
         </StackPanel>
     </Grid>
 </Window>
