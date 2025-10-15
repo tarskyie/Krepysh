@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Krepysh (Native)">
+    Title="Krepysh App">
 
     <Window.SystemBackdrop>
         <MicaBackdrop Kind="Base"/>
@@ -16,78 +16,265 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="32"/>
-            <RowDefinition Height="48"/>
-            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.2*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- title bar -->
-
-        <Grid x:Name="AppTitleBar" Grid.Row="0">
-            <Image Source="Assets/WebLogo.png"
-           HorizontalAlignment="Left" 
-           Width="16" Height="16" 
-           Margin="8,0"/>
-            <TextBlock x:Name="AppTitleTextBlock" Text="TarskyTGI SDAT Web"
-               TextWrapping="NoWrap"
-               Style="{StaticResource CaptionTextBlockStyle}" 
-               VerticalAlignment="Center"
-               Margin="28,0,0,0"/>
-        </Grid>
-        
-        <!-- window -->
-        <!-- top panel -->
-        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal">
-            <Button Style="{StaticResource AccentButtonStyle}" Click="BuildWebsite">Build</Button>
-            <Button Click="OpenIndex">Open in Edge</Button>
-            <Button Click="NewPage">New page</Button>
-            <Button Click="ClearItems">Clear</Button>
-            <Button Click="OpenDirectory">Open folder</Button>
-            
-            <TextBox x:Name="urlBox" Width="256" Height="32" VerticalAlignment="Center" Text="http://127.0.0.1:8080/v1/chat/completions" PlaceholderText="API url" />
-            <TextBox x:Name="KeyBox" Width="128" Height="32" VerticalAlignment="Center" Text="none" PlaceholderText="API key" />
-        </StackPanel>
-           
-        <!-- pages list -->
-        <ListBox x:Name="lb_pages" Grid.Row="2" Grid.Column="0">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Width="512">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBox Width="448"></TextBox>
-                            <Button Width="64" Click="SendRequest">📩</Button>
-                        </StackPanel>
-                        <TextBox Width="512" Height="32" Text="Sample Page" PlaceholderText="Page name" TextChanged="TextBox_NameChanged" />
-                        <TextBox Height="128" AcceptsReturn="True" TextWrapping="Wrap" TextChanged="TextBox_TextChanged"
-                                 Text="&lt;!DOCTYPE html&gt;&#xD;&#xA;&lt;html&gt;&#xD;&#xA;&lt;head&gt;&#xD;&#xA;    &lt;title&gt;Sample Page&lt;/title&gt;&#xD;&#xA;&lt;/head&gt;&#xD;&#xA;&lt;body&gt;&#xD;&#xA;    &lt;h1&gt;Welcome to My HTML Page&lt;/h1&gt;&#xD;&#xA;    &lt;p&gt;This is a sample paragraph with proper line breaks.&lt;/p&gt;&#xD;&#xA;&lt;/body&gt;&#xD;&#xA;&lt;/html&gt;&#xD;&#xA;" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        
-        <!-- right side -->
-        <StackPanel Grid.Row="2" Grid.Column="1" Padding="20,10,0,0">
-            <TextBox x:Name="nameBox" HorizontalAlignment="Stretch" Height="32" VerticalAlignment="Center" Text="Website" PlaceholderText="Website Name" />
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="40"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Grid.Column="0" Width="40" VerticalAlignment="Center">Icon</TextBlock>
-                <TextBox x:Name="iconBox" Grid.Column="1" HorizontalAlignment="Stretch"/>
-                <Button Grid.Column="2" Margin="10, 0, 0, 0" Click="SelectIcon">📂</Button>
-            </Grid>
-            <CheckBox x:Name="indexToggle" Content="index.html redirects to the first page (if present)" IsChecked="True"/>
-            <StackPanel Orientation="Horizontal">
-                <Button Click="AddAsset">Add</Button>
-                <Button Click="ClearAssets">Clear assets</Button>
+        <!-- Title Bar -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Grid.ColumnSpan="2">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
+                <Image Source="Assets/WebLogo.png"
+                       Width="16" Height="16" 
+                       Margin="0,0,12,0"/>
+                <TextBlock x:Name="AppTitleTextBlock" 
+                           Text="Krepysh App"
+                           TextWrapping="NoWrap"
+                           Style="{StaticResource CaptionTextBlockStyle}" 
+                           VerticalAlignment="Center"/>
             </StackPanel>
-            <ListBox x:Name="lb_assets" Height="256" HorizontalAlignment="Stretch"/>
-        </StackPanel>
+        </Grid>
+
+        <!-- Top Command Bar -->
+        <CommandBar Grid.Row="1" Grid.ColumnSpan="2" DefaultLabelPosition="Right" HorizontalAlignment="Left">
+            <AppBarButton Icon="Play" Label="Build" Click="BuildWebsite" 
+                          Style="{StaticResource AppBarButtonRevealStyle}"/>
+            <AppBarButton Label="Open in Edge" Click="OpenIndex">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE774;"/>
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Icon="Add" Label="New Page" Click="NewPage"/>
+            <AppBarButton Icon="Delete" Label="Clear" Click="ClearItems"/>
+            <AppBarButton Icon="Folder" Label="Open Folder" Click="OpenDirectory"/>
+
+            <AppBarSeparator/>
+
+            <AppBarElementContainer VerticalContentAlignment="Center">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="8,0">
+                    <TextBox x:Name="urlBox" 
+                             Width="280" 
+                             VerticalAlignment="Center" 
+                             Text="http://127.0.0.1:8080/v1/chat/completions" 
+                             PlaceholderText="API URL"
+                             Header="API Endpoint">
+                        <TextBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <FontIcon FontSize="12" Glyph="&#xE774;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock Text="API Endpoint" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </TextBox.HeaderTemplate>
+                    </TextBox>
+                    <PasswordBox x:Name="KeyBox" 
+                             Width="140" 
+                             VerticalAlignment="Center" 
+                             PlaceholderText="API Key"
+                             Header="Key">
+                        <PasswordBox.HeaderTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4">
+                                    <FontIcon FontSize="12" Glyph="&#xE192;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock Text="Key" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </PasswordBox.HeaderTemplate>
+                    </PasswordBox>
+                </StackPanel>
+            </AppBarElementContainer>
+        </CommandBar>
+
+        <!-- Pages List -->
+        <Grid Grid.Row="2" Grid.Column="0" Margin="12,8,6,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Pages" 
+                       Style="{StaticResource SubtitleTextBlockStyle}" 
+                       Margin="4,0,0,8"/>
+
+            <ListBox x:Name="lb_pages" 
+                     Grid.Row="1"
+                     CornerRadius="8"
+                     BorderThickness="1"
+                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,8" RowSpacing="8">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Prompt Section -->
+                            <Grid Grid.Row="0" ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" 
+                                         PlaceholderText="Enter AI prompt..."
+                                         Header="AI Prompt">
+                                    <TextBox.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <FontIcon FontSize="12" Glyph="&#xE8F8;" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                                <TextBlock Text="AI Prompt" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </TextBox.HeaderTemplate>
+                                </TextBox>
+                                <Button Grid.Column="1" 
+                                        Click="SendRequest"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        VerticalAlignment="Bottom"
+                                        ToolTipService.ToolTip="Send Request">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE724;" FontSize="16"/>
+                                        <TextBlock Text="Send"/>
+                                    </StackPanel>
+                                </Button>
+                            </Grid>
+
+                            <!-- Page Name -->
+                            <TextBox Grid.Row="1"
+                                     Text="Sample Page" 
+                                     PlaceholderText="Page name" 
+                                     TextChanged="TextBox_NameChanged"
+                                     Header="Page Name">
+                                <TextBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon FontSize="12" Glyph="&#xE8A5;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <TextBlock Text="Page Name" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </TextBox.HeaderTemplate>
+                            </TextBox>
+
+                            <!-- HTML Content -->
+                            <TextBox Grid.Row="2"
+                                     Height="160" 
+                                     AcceptsReturn="True" 
+                                     TextWrapping="Wrap" 
+                                     TextChanged="TextBox_TextChanged"
+                                     Text="&lt;!DOCTYPE html&gt;&#xD;&#xA;&lt;html&gt;&#xD;&#xA;&lt;head&gt;&#xD;&#xA;    &lt;title&gt;Sample Page&lt;/title&gt;&#xD;&#xA;&lt;/head&gt;&#xD;&#xA;&lt;body&gt;&#xD;&#xA;    &lt;h1&gt;Welcome to My HTML Page&lt;/h1&gt;&#xD;&#xA;    &lt;p&gt;This is a sample paragraph with proper line breaks.&lt;/p&gt;&#xD;&#xA;&lt;/body&gt;&#xD;&#xA;&lt;/html&gt;&#xD;&#xA;"
+                                     FontFamily="Consolas"
+                                     Header="HTML Content">
+                                <TextBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon FontSize="12" Glyph="&#xE943;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <TextBlock Text="HTML Content" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </TextBox.HeaderTemplate>
+                            </TextBox>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <!-- Right Panel -->
+        <Grid Grid.Row="2" Grid.Column="1" Margin="6,8,12,12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Text="Configuration" 
+                       Style="{StaticResource SubtitleTextBlockStyle}" 
+                       Margin="4,0,0,8"/>
+
+            <StackPanel Grid.Row="1" 
+                        Spacing="12"
+                        Padding="12"
+                        CornerRadius="8"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+
+                <!-- Website Name -->
+                <TextBox x:Name="nameBox" 
+                         Text="Website" 
+                         PlaceholderText="Website Name"
+                         Header="Website Name">
+                    <TextBox.HeaderTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <FontIcon FontSize="12" Glyph="&#xE774;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <TextBlock Text="Website Name" Style="{StaticResource CaptionTextBlockStyle}"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </TextBox.HeaderTemplate>
+                </TextBox>
+
+                <!-- Icon Selection -->
+                <StackPanel Spacing="4">
+                    <TextBlock Style="{StaticResource CaptionTextBlockStyle}" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                        <Run>&#xE91B;</Run>
+                        <Run Text="Icon"/>
+                    </TextBlock>
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="iconBox" 
+                                 Grid.Column="0"
+                                 PlaceholderText="Select icon file..."/>
+                        <Button Grid.Column="1" 
+                                Click="SelectIcon"
+                                ToolTipService.ToolTip="Browse for icon">
+                            <FontIcon Glyph="&#xE8B7;"/>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Index Redirect Option -->
+                <CheckBox x:Name="indexToggle" 
+                          IsChecked="True">
+                    <TextBlock TextWrapping="Wrap" Text="index.html redirects to the first page (if present)"/>
+                </CheckBox>
+
+                <MenuFlyoutSeparator/>
+
+                <!-- Assets Section -->
+                <TextBlock Text="Assets" 
+                           Style="{StaticResource BodyStrongTextBlockStyle}"/>
+
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Click="AddAsset">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                            <TextBlock Text="Add Asset"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Click="ClearAssets">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                            <TextBlock Text="Clear All"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <ListBox x:Name="lb_assets" 
+                         MinHeight="200"
+                         MaxHeight="300"
+                         CornerRadius="4"
+                         BorderThickness="1"
+                         BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

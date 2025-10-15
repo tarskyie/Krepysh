@@ -43,7 +43,7 @@ namespace SDATweb
             this.ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
 
-            KeyBox.Text = apiKey;
+            KeyBox.Password = apiKey;
             urlBox.Text = apiUrl;
             nameBox.Text = appName;
         }
@@ -84,7 +84,7 @@ namespace SDATweb
                     if (smallerTextBox != null && largerTextBox != null)
                     {
                         largerTextBox.Text = "Waiting for response...";
-                        largerTextBox.Text = await requestSender.SendHTTP(urlBox.Text, KeyBox.Text, smallerTextBox.Text, systemPrompt + FileNames());
+                        largerTextBox.Text = await requestSender.SendHTTP(urlBox.Text, KeyBox.Password, smallerTextBox.Text, systemPrompt + FileNames());
                     }
                 }
             }
