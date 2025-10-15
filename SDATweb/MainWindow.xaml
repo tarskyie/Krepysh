@@ -6,6 +6,7 @@
     xmlns:local="using:SDATweb"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Title="Krepysh App">
 
@@ -188,116 +189,100 @@
 
         <!-- Right Panel -->
         <ScrollViewer Grid.Row="2" Grid.Column="1" Margin="6,8,12,12">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+            <StackPanel Spacing="8">
 
                 <TextBlock Text="Configuration" 
-               Style="{StaticResource SubtitleTextBlockStyle}" 
-               Margin="4,0,0,8"/>
+                   Style="{StaticResource SubtitleTextBlockStyle}" 
+                   Margin="4,0,0,0"/>
 
-                <StackPanel Grid.Row="1" 
-                Spacing="12"
-                Padding="12"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <!-- Accordion container -->
+                <StackPanel>
+                    <muxc:Expander Header="Website settings" HorizontalAlignment="Stretch"  IsExpanded="True" Margin="0,8,0,0">
+                        <StackPanel Spacing="4">
+                            <TextBox x:Name="nameBox" 
+                                 Text="Website" 
+                                 PlaceholderText="Website Name"
+                                 Header="Website Name">
+                                <TextBox.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <FontIcon FontSize="12" Glyph="&#xE774;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <TextBlock Text="Website Name" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </TextBox.HeaderTemplate>
+                            </TextBox>
 
-                    <!-- Website Name -->
-                    <TextBox x:Name="nameBox" 
-                 Text="Website" 
-                 PlaceholderText="Website Name"
-                 Header="Website Name">
-                        <TextBox.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <FontIcon FontSize="12" Glyph="&#xE774;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                    <TextBlock Text="Website Name" Style="{StaticResource CaptionTextBlockStyle}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </TextBox.HeaderTemplate>
-                    </TextBox>
+                            <TextBlock Style="{StaticResource CaptionTextBlockStyle}">Icon</TextBlock>
+                            <Grid ColumnSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="iconBox" 
+                                     Grid.Column="0"
+                                     PlaceholderText="Select icon file..."/>
+                                <Button Grid.Column="1" 
+                                    Click="SelectIcon"
+                                    ToolTipService.ToolTip="Browse for icon">
+                                    <FontIcon Glyph="&#xE8B7;"/>
+                                </Button>
+                            </Grid>
 
-                    <!-- Icon Selection -->
-                    <StackPanel Spacing="4">
-                        <TextBlock Style="{StaticResource CaptionTextBlockStyle}">
-                Icon
-                        </TextBlock>
-                        <Grid ColumnSpacing="8">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox x:Name="iconBox" 
-                         Grid.Column="0"
-                         PlaceholderText="Select icon file..."/>
-                            <Button Grid.Column="1" 
-                        Click="SelectIcon"
-                        ToolTipService.ToolTip="Browse for icon">
-                                <FontIcon Glyph="&#xE8B7;"/>
-                            </Button>
-                        </Grid>
-                    </StackPanel>
+                            <CheckBox x:Name="indexToggle" IsChecked="True">
+                                <TextBlock TextWrapping="Wrap" Text="index.html redirects to the first page (if present)"/>
+                            </CheckBox>
+                        </StackPanel>
+                    </muxc:Expander>
 
-                    <!-- Index Redirect Option -->
-                    <CheckBox x:Name="indexToggle" 
-                  IsChecked="True">
-                        <TextBlock TextWrapping="Wrap" Text="index.html redirects to the first page (if present)"/>
-                    </CheckBox>
+                    <muxc:Expander Header="CSS Styles" HorizontalAlignment="Stretch" IsExpanded="False" Margin="0,4,0,0">
+                        <TextBox x:Name="cssBox" 
+                             Height="320" 
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             Text="body {&#xD;&#xA;    font-family: Arial, sans-serif;&#xD;&#xA;    margin: 20px;&#xD;&#xA;    background-color: #f4f4f4;&#xD;&#xA;}&#xD;&#xA;h1 {&#xD;&#xA;    color: #333;&#xD;&#xA;}&#xD;&#xA;p {&#xD;&#xA;    line-height: 1.6;&#xD;&#xA;}"
+                             FontFamily="Consolas"
+                             Header="CSS Styles">
+                            <TextBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="4">
+                                        <FontIcon FontSize="12" Glyph="&#xE943;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                        <TextBlock Text="CSS Styles" Style="{StaticResource CaptionTextBlockStyle}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TextBox.HeaderTemplate>
+                        </TextBox>
+                    </muxc:Expander>
 
-                    <MenuFlyoutSeparator/>
-
-                    <!-- CSS Editor -->
-                    <TextBox x:Name="cssBox" 
-                 Height="100" 
-                 AcceptsReturn="True" 
-                 TextWrapping="Wrap"
-                 Text="body {&#xD;&#xA;    font-family: Arial, sans-serif;&#xD;&#xA;    margin: 20px;&#xD;&#xA;    background-color: #f4f4f4;&#xD;&#xA;}&#xD;&#xA;h1 {&#xD;&#xA;    color: #333;&#xD;&#xA;}&#xD;&#xA;p {&#xD;&#xA;    line-height: 1.6;&#xD;&#xA;}"
-                 FontFamily="Consolas"
-                 Header="CSS Styles">
-                        <TextBox.HeaderTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal" Spacing="4">
-                                    <FontIcon FontSize="12" Glyph="&#xE943;" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                                    <TextBlock Text="CSS Styles" Style="{StaticResource CaptionTextBlockStyle}"/>
-                                </StackPanel>
-                            </DataTemplate>
-                        </TextBox.HeaderTemplate>
-                    </TextBox>
-
-                    <MenuFlyoutSeparator/>
-                    
-                    <!-- Assets Section -->
-                    <TextBlock Text="Assets" 
-                   Style="{StaticResource BodyStrongTextBlockStyle}"/>
-
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Click="AddAsset">
+                    <muxc:Expander Header="Assets" HorizontalAlignment="Stretch" IsExpanded="False" Margin="0,4,0,0">
+                        <StackPanel Spacing="8">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE710;" FontSize="14"/>
-                                <TextBlock Text="Add Asset"/>
+                                <Button Click="AddAsset">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE710;" FontSize="14"/>
+                                        <TextBlock Text="Add Asset"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button Click="ClearAssets">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14"/>
+                                        <TextBlock Text="Clear All"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
-                        </Button>
-                        <Button Click="ClearAssets">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <FontIcon Glyph="&#xE74D;" FontSize="14"/>
-                                <TextBlock Text="Clear All"/>
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
 
-                    <ListBox x:Name="lb_assets" 
-                 MinHeight="200"
-                 MaxHeight="300"
-                 CornerRadius="4"
-                 BorderThickness="1"
-                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"/>
+                            <ListBox x:Name="lb_assets" 
+                                 MinHeight="200"
+                                 MaxHeight="300"
+                                 CornerRadius="4"
+                                 BorderThickness="1"
+                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"/>
+                        </StackPanel>
+                    </muxc:Expander>
+
                 </StackPanel>
-            </Grid>
+            </StackPanel>
         </ScrollViewer>
-        
+
     </Grid>
 </Window>
