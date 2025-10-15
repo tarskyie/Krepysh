@@ -105,6 +105,8 @@ namespace SDATweb
                 return;
             }
 
+            System.IO.File.WriteAllText(Path.Combine(deployFolder, "styles.css"), cssBox.Text);
+
             // a navigation menu listing all pages
             var navLinks = new System.Text.StringBuilder();
             navLinks.AppendLine("<nav>");
@@ -120,17 +122,17 @@ namespace SDATweb
             {
                 string pageHtml = websiteDataModel.PagesContent[i];
 
-                // Look for the <head> to insert favicon
+                // Look for the <head> to insert links to the stylesheet and favicon
                 int headIndex = pageHtml.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
                 if (headIndex >= 0)
                 {
                     headIndex += "<head>".Length;
-                    pageHtml = pageHtml.Insert(headIndex, "<link rel='icon' type='image/png' href='assets/icon.png'>");
+                    pageHtml = pageHtml.Insert(headIndex, "<link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">");
                 }
                 else
                 {
-                    // If no <head> tag was found, append the favicon at the end
-                    pageHtml += "<link rel='icon' type='image/png' href='assets/icon.png'>";
+                    // If no <head> tag was found, append the favicon and css link at the end
+                    pageHtml += "<link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">";
                 }
 
                 // Look for the <body> tag to insert the nav
@@ -163,7 +165,7 @@ namespace SDATweb
             {
                 indexContent.AppendLine("<!DOCTYPE html>");
                 indexContent.AppendLine("<html>");
-                indexContent.AppendLine($"<head><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'></head>");
+                indexContent.AppendLine($"<head><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'><link rel=\"stylesheet\" href=\"styles.css\"></head>");
                 indexContent.AppendLine("<body>");
                 indexContent.AppendLine(navHtml);
                 indexContent.AppendLine($"<h1>Welcome to the {nameBox.Text} Home Page</h1>");
