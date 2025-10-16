@@ -1,14 +1,11 @@
-using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System.Text;
-using System.Collections.Generic;
 using Microsoft.UI.Xaml.Media;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace SDATweb
@@ -25,8 +22,10 @@ namespace SDATweb
         private string apiUrl = "http://127.0.0.1:8080/v1/chat/completions";
         private string appName = "My Website";
         private string deployFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site";
-        private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\assets";
+        private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site\\assets";
         private int appPort = 5500;
+        private bool useLocalServer = false;
+        private Process? serverProcess;
 
         public MainWindow()
         {
@@ -46,6 +45,15 @@ namespace SDATweb
             KeyBox.Password = apiKey;
             urlBox.Text = apiUrl;
             nameBox.Text = appName;
+
+            useLocalServer = HasLocalServer();
+
+            this.Closed += MainWindow_Closed;
+        }
+
+        private void MainWindow_Closed(object sender, WindowEventArgs args)
+        {
+            StopServer();
         }
 
         private void NewPage(object sender, RoutedEventArgs e)
@@ -97,7 +105,7 @@ namespace SDATweb
 
             try
             {
-                System.IO.Directory.CreateDirectory(deployFolder);
+                Directory.CreateDirectory(deployFolder);
             }
             catch (Exception ex)
             {
@@ -105,7 +113,7 @@ namespace SDATweb
                 return;
             }
 
-            System.IO.File.WriteAllText(Path.Combine(deployFolder, "styles.css"), cssBox.Text);
+            File.WriteAllText(Path.Combine(deployFolder, "styles.css"), cssBox.Text);
 
             // a navigation menu listing all pages
             var navLinks = new System.Text.StringBuilder();
@@ -148,10 +156,10 @@ namespace SDATweb
                     pageHtml += navHtml;
                 }
 
-                string pageFileName = System.IO.Path.Combine(deployFolder, $"{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html");
+                string pageFileName = Path.Combine(deployFolder, $"{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html");
                 try
                 {
-                    System.IO.File.WriteAllText(pageFileName, pageHtml);
+                    File.WriteAllText(pageFileName, pageHtml);
                 }
                 catch (Exception ex)
                 {
@@ -190,10 +198,10 @@ namespace SDATweb
                 indexContent.AppendLine("</html>");
             }
 
-                string indexFileName = System.IO.Path.Combine(deployFolder, "index.html");
+                string indexFileName = Path.Combine(deployFolder, "index.html");
             try
             {
-                System.IO.File.WriteAllText(indexFileName, indexContent.ToString());
+                File.WriteAllText(indexFileName, indexContent.ToString());
             }
             catch (Exception ex)
             {
@@ -212,10 +220,10 @@ namespace SDATweb
             notFoundContent.AppendLine("</body>");
             notFoundContent.AppendLine("</html>");
 
-            string notFoundFileName = System.IO.Path.Combine(deployFolder, "404.html");
+            string notFoundFileName = Path.Combine(deployFolder, "404.html");
             try
             {
-                System.IO.File.WriteAllText(notFoundFileName, notFoundContent.ToString());
+                File.WriteAllText(notFoundFileName, notFoundContent.ToString());
             }
             catch (Exception ex)
             {
@@ -227,16 +235,16 @@ namespace SDATweb
         {
             try
             {
-                System.IO.Directory.CreateDirectory(System.IO.Path.Combine(deployFolder, assetsFolder));
+                Directory.CreateDirectory(assetsFolder);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating folder {deployFolder}/{assetsFolder}: {ex.Message}");
+                Console.WriteLine($"Error creating folder {assetsFolder}: {ex.Message}");
                 return;
             }
             foreach (var asset in websiteDataModel.Assets)
             {
-                string destPath = System.IO.Path.Combine(deployFolder, assetsFolder, asset.Name);
+                string destPath = Path.Combine(assetsFolder, asset.Name);
                 try
                 {
                     File.Copy(asset.Path, destPath, true);
@@ -249,7 +257,7 @@ namespace SDATweb
             // copy icon
             try
             {
-                File.Copy(iconBox.Text, System.IO.Path.Combine(deployFolder, assetsFolder, "icon.png"), true);
+                File.Copy(iconBox.Text, Path.Combine(assetsFolder, "icon.png"), true);
             }
             catch (Exception ex)
             {
@@ -320,12 +328,11 @@ namespace SDATweb
 
         private void clearSite()
         {
-            string deployFolder = "site";
             try
             {
-                if (System.IO.Directory.Exists(deployFolder))
+                if (Directory.Exists(deployFolder))
                 {
-                    System.IO.Directory.Delete(deployFolder, true);
+                    Directory.Delete(deployFolder, true);
                 }
             }
             catch (Exception ex)
@@ -348,9 +355,13 @@ namespace SDATweb
 
         private async void OpenIndex(object sender, RoutedEventArgs e)
         {
-            string index = await StartServer();
+            if (useLocalServer) {
+                string index = await StartServer();
 
-            processLauncher.GenericStartProcess(edgePath, index);
+                processLauncher.GenericStartProcess(edgePath, index);
+            }
+
+            processLauncher.GenericStartProcess(edgePath, $"{deployFolder}/index.html");
         }
 
         private async void SelectIcon(object sender, RoutedEventArgs e)
@@ -384,16 +395,25 @@ namespace SDATweb
         {
             string res = String.Empty;
 
-            foreach (var item in lb_assets.Items) {
+            foreach (var item in lb_assets.Items)
                 res += "assets\\" + item.ToString() + ";";
-            }
 
             return res;
         }
 
+        private bool HasLocalServer()
+        {
+            if (File.Exists("LocalServer\\KrepyshLocalServer.exe"))
+                return true;
+
+            return false;
+        }
+
         private async Task<string> StartServer()
         {
-            Process serverProcess = new Process
+            StopServer();
+
+            serverProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -404,16 +424,47 @@ namespace SDATweb
                     CreateNoWindow = true 
                 }
             };
+
+            serverProcess.Exited += (s, e) =>
+            {
+                Debug.WriteLine("Server process exited unexpectedly");
+                serverProcess = null;
+            };
+
             serverProcess.Start();
 
             string? response = await serverProcess.StandardOutput.ReadLineAsync();
 
-            if (response.StartsWith("*SUC "))
+            if (response != null && response.StartsWith("*SUC "))
             {
                 return response.Substring(5);
             }
 
+            StopServer();
             return "failed";
+        }
+
+        private void StopServer()
+        {
+            if (serverProcess != null)
+            {
+                try
+                {
+                    if (!serverProcess.HasExited)
+                    {
+                        serverProcess.Kill();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error stopping server: {ex.Message}");
+                }
+                finally
+                {
+                    serverProcess?.Dispose();
+                    serverProcess = null;
+                }
+            }
         }
     }
 }

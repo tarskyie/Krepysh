@@ -171,6 +171,7 @@
                                      TextChanged="TextBox_TextChanged"
                                      Text="&lt;!DOCTYPE html&gt;&#xD;&#xA;&lt;html&gt;&#xD;&#xA;&lt;head&gt;&#xD;&#xA;    &lt;title&gt;Sample Page&lt;/title&gt;&#xD;&#xA;&lt;/head&gt;&#xD;&#xA;&lt;body&gt;&#xD;&#xA;    &lt;h1&gt;Welcome to My HTML Page&lt;/h1&gt;&#xD;&#xA;    &lt;p&gt;This is a sample paragraph with proper line breaks.&lt;/p&gt;&#xD;&#xA;&lt;/body&gt;&#xD;&#xA;&lt;/html&gt;&#xD;&#xA;"
                                      FontFamily="Consolas"
+                                     
                                      Header="HTML Content">
                                 <TextBox.HeaderTemplate>
                                     <DataTemplate>
