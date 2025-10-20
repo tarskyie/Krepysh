@@ -2,8 +2,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
 using WinRT.Interop;
@@ -35,18 +37,24 @@ namespace SDATweb
             {
                 if (args[i] == "-key" && i + 1 < args.Length) { apiKey = args[i + 1]; }
                 if (args[i] == "-url" && i + 1 < args.Length) { apiUrl = args[i + 1]; }
-                if (args[i] == "-name" && i + 1 < args.Length) { appName = args[i + 1]; }
+                if (args[i] == "-name" && i + 1 < args.Length) { 
+                    appName = args[i + 1];
+                    deployFolder.Replace("site", args[i + 1]);
+                    assetsFolder = Path.Combine(deployFolder, "assets");
+                }
             }
 
             this.InitializeComponent();
             this.ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
 
-            KeyBox.Password = apiKey;
+            keyBox.Password = apiKey;
             urlBox.Text = apiUrl;
             nameBox.Text = appName;
 
             useLocalServer = HasLocalServer();
+
+            _ = LoadConfig();
 
             this.Closed += MainWindow_Closed;
         }
@@ -92,13 +100,13 @@ namespace SDATweb
                     if (smallerTextBox != null && largerTextBox != null)
                     {
                         largerTextBox.Text = "Waiting for response...";
-                        largerTextBox.Text = await requestSender.SendHTTP(urlBox.Text, KeyBox.Password, smallerTextBox.Text, systemPrompt + FileNames());
+                        largerTextBox.Text = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, smallerTextBox.Text, systemPrompt + FileNames());
                     }
                 }
             }
         }
 
-        private void BuildWebsite(object sender, RoutedEventArgs e)
+        private async void BuildWebsite(object sender, RoutedEventArgs e)
         {
             clearSite();
             copyAssets();
@@ -130,7 +138,6 @@ namespace SDATweb
             {
                 string pageHtml = websiteDataModel.PagesContent[i];
 
-                // Look for the <head> to insert links to the stylesheet and favicon
                 int headIndex = pageHtml.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
                 if (headIndex >= 0)
                 {
@@ -139,11 +146,9 @@ namespace SDATweb
                 }
                 else
                 {
-                    // If no <head> tag was found, append the favicon and css link at the end
                     pageHtml += "<link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">";
                 }
 
-                // Look for the <body> tag to insert the nav
                 int bodyIndex = pageHtml.IndexOf("<body>", StringComparison.OrdinalIgnoreCase);
                 if (bodyIndex >= 0)
                 {
@@ -152,7 +157,6 @@ namespace SDATweb
                 }
                 else
                 {
-                    // If no <body> tag was found, append the nav at the end
                     pageHtml += navHtml;
                 }
 
@@ -228,6 +232,16 @@ namespace SDATweb
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving file {notFoundFileName}: {ex.Message}");
+            }
+
+            // save current work
+            try
+            {
+                await SaveConfig();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error saving config: {ex.Message}");
             }
         }
 
@@ -332,6 +346,7 @@ namespace SDATweb
             {
                 if (Directory.Exists(deployFolder))
                 {
+                    // it should delete contents of the folder, not itself. fix tomorrow.
                     Directory.Delete(deployFolder, true);
                 }
             }
@@ -355,13 +370,17 @@ namespace SDATweb
 
         private async void OpenIndex(object sender, RoutedEventArgs e)
         {
+            BuildWebsite(sender, e);
+
             if (useLocalServer) {
                 string index = await StartServer();
 
                 processLauncher.GenericStartProcess(edgePath, index);
             }
-
-            processLauncher.GenericStartProcess(edgePath, $"{deployFolder}/index.html");
+            else
+            {
+                processLauncher.GenericStartProcess(edgePath, $"{deployFolder}/index.html");
+            }
         }
 
         private async void SelectIcon(object sender, RoutedEventArgs e)
@@ -464,6 +483,123 @@ namespace SDATweb
                     serverProcess?.Dispose();
                     serverProcess = null;
                 }
+            }
+        }
+
+        private async Task SaveConfig()
+        {
+            var cfg = new ConfigModel
+            {
+                AppName = nameBox?.Text ?? appName,
+                ApiKey = keyBox?.Password ?? apiKey,
+                ApiUrl = urlBox?.Text ?? apiUrl,
+                DeployFolder = deployFolder,
+                AssetsFolder = assetsFolder,
+                AppPort = appPort,
+                UseLocalServer = useLocalServer,
+                IndexToggle = indexToggle?.IsChecked ?? false,
+                Css = cssBox?.Text ?? "",
+                IconPath = iconBox?.Text ?? "",
+                Pages = new List<PageInfo>(),
+                Assets = new List<AssetInfo>()
+            };
+
+            for (int i = 0; i < websiteDataModel.PagesName.Count && i < websiteDataModel.PagesContent.Count; i++)
+            {
+                cfg.Pages.Add(new PageInfo { Name = websiteDataModel.PagesName[i], Content = websiteDataModel.PagesContent[i] });
+            }
+
+            foreach (var asset in websiteDataModel.Assets)
+            {
+                cfg.Assets.Add(new AssetInfo { Name = asset.Name, Path = asset.Path });
+            }
+
+            try
+            {
+                Directory.CreateDirectory(deployFolder);
+                string configPath = Path.Combine(deployFolder, "config.json");
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string json = JsonSerializer.Serialize(cfg, options);
+                await File.WriteAllTextAsync(configPath, json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"SaveConfig error: {ex.Message}");
+                throw;
+            }
+        }
+
+        // Load config from deployFolder\config.json and apply to UI/model
+        public async Task LoadConfig()
+        {
+            try
+            {
+                string configPath = Path.Combine(deployFolder, "config.json");
+                if (!File.Exists(configPath))
+                {
+                    Debug.WriteLine($"{configPath} does not exist");
+                    return;
+                }
+
+                string json = await File.ReadAllTextAsync(configPath);
+                var cfg = JsonSerializer.Deserialize<ConfigModel>(json);
+                if (cfg == null)
+                    return;
+
+                // apply core settings
+                deployFolder = string.IsNullOrWhiteSpace(cfg.DeployFolder) ? deployFolder : cfg.DeployFolder;
+                assetsFolder = string.IsNullOrWhiteSpace(cfg.AssetsFolder) ? assetsFolder : cfg.AssetsFolder;
+                appPort = cfg.AppPort;
+                useLocalServer = cfg.UseLocalServer;
+
+                try
+                {
+                    if (nameBox != null) nameBox.Text = cfg.AppName ?? nameBox.Text;
+                    if (urlBox != null) urlBox.Text = cfg.ApiUrl ?? urlBox.Text;
+                    if (keyBox != null) keyBox.Password = cfg.ApiKey ?? keyBox.Password;
+                    if (cssBox != null) cssBox.Text = cfg.Css ?? cssBox.Text;
+                    if (iconBox != null) iconBox.Text = cfg.IconPath ?? iconBox.Text;
+                    if (indexToggle != null) indexToggle.IsChecked = cfg.IndexToggle;
+
+                    // clear existing pages/assets and load from config
+                    websiteDataModel.ClearAll();
+                    lb_pages.Items.Clear();
+                    lb_assets.Items.Clear();
+
+                    foreach (var p in cfg.Pages)
+                    {
+                        websiteDataModel.AddNewPage(p.Content ?? "", p.Name ?? "Page");
+                        lb_pages.Items.Add(1);
+                    }
+
+                    foreach (var a in cfg.Assets)
+                    {
+                        try
+                        {
+                            if (!string.IsNullOrWhiteSpace(a.Path) && File.Exists(a.Path))
+                            {
+                                StorageFile file = await StorageFile.GetFileFromPathAsync(a.Path);
+                                if (file != null)
+                                {
+                                    websiteDataModel.AddAsset(file);
+                                    lb_assets.Items.Add(file.Name);
+                                }
+                            }
+                        }
+                        catch (Exception exAsset)
+                        {
+                            Debug.WriteLine($"LoadConfig: failed to add asset '{a.Path}': {exAsset.Message}");
+                        }
+                    }
+                }
+                catch (Exception exUi)
+                {
+                    Debug.WriteLine($"LoadConfig UI apply error: {exUi.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"LoadConfig error: {ex.Message}");
             }
         }
     }

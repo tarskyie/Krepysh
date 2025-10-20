@@ -41,14 +41,14 @@
 
         <!-- Top Command Bar -->
         <CommandBar Grid.Row="1" Grid.ColumnSpan="2" DefaultLabelPosition="Right" HorizontalAlignment="Left">
-            <AppBarButton Icon="Play" Label="Build" Click="BuildWebsite" 
-                          Style="{StaticResource AppBarButtonRevealStyle}"/>
             <AppBarButton Label="Open in Edge" Click="OpenIndex">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xE774;"/>
                 </AppBarButton.Icon>
             </AppBarButton>
-            <AppBarButton Icon="Add" Label="New Page" Click="NewPage"/>
+            <AppBarButton Icon="Save" Label="Build &amp; save" Click="BuildWebsite" 
+                          Style="{StaticResource AppBarButtonRevealStyle}"/>
+            <AppBarButton Icon="Add" Label="New page" Click="NewPage"/>
             <AppBarButton Icon="Delete" Label="Clear" Click="ClearItems"/>
             <AppBarButton Icon="Folder" Label="Open Folder" Click="OpenDirectory"/>
 
@@ -71,7 +71,7 @@
                             </DataTemplate>
                         </TextBox.HeaderTemplate>
                     </TextBox>
-                    <PasswordBox x:Name="KeyBox" 
+                    <PasswordBox x:Name="keyBox" 
                              Width="140" 
                              VerticalAlignment="Center" 
                              PlaceholderText="API Key"
