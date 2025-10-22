@@ -1,15 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Windows.Services.Maps;
-using Windows.Storage;
+﻿using System.Collections.Generic;
 
 namespace SDATweb
 {
