@@ -49,6 +49,7 @@
             <AppBarButton Icon="Save" Label="Build &amp; save" Click="BuildWebsite" 
                           Style="{StaticResource AppBarButtonRevealStyle}"/>
             <AppBarButton Icon="Add" Label="New page" Click="NewPage"/>
+            <AppBarButton Icon="Remove" Label="Remove page" Click="RemovePage"/>
             <AppBarButton Icon="Delete" Label="Clear" Click="ClearItems"/>
             <AppBarButton Icon="Folder" Label="Open Folder" Click="OpenDirectory"/>
 
@@ -102,11 +103,11 @@
                        Margin="4,0,0,8"/>
 
             <ListBox x:Name="lb_pages" 
-                     Grid.Row="1"
-                     CornerRadius="8"
-                     BorderThickness="1"
-                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                 Grid.Row="1"
+                 CornerRadius="8"
+                 BorderThickness="1"
+                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,8" RowSpacing="8">
@@ -124,8 +125,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBox Grid.Column="0" 
-                                         PlaceholderText="Enter AI prompt..."
-                                         Header="AI Prompt">
+                             PlaceholderText="Enter AI prompt..."
+                             Header="AI Prompt">
                                     <TextBox.HeaderTemplate>
                                         <DataTemplate>
                                             <StackPanel Orientation="Horizontal" Spacing="4">
@@ -136,10 +137,10 @@
                                     </TextBox.HeaderTemplate>
                                 </TextBox>
                                 <Button Grid.Column="1" 
-                                        Click="SendRequest"
-                                        Style="{StaticResource AccentButtonStyle}"
-                                        VerticalAlignment="Bottom"
-                                        ToolTipService.ToolTip="Send Request">
+                            Click="SendRequest"
+                            Style="{StaticResource AccentButtonStyle}"
+                            VerticalAlignment="Bottom"
+                            ToolTipService.ToolTip="Send Request">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <FontIcon Glyph="&#xE724;" FontSize="16"/>
                                         <TextBlock Text="Send"/>
@@ -147,12 +148,12 @@
                                 </Button>
                             </Grid>
 
-                            <!-- Page Name -->
+                            <!-- Page Name - BOUND TO DATA -->
                             <TextBox Grid.Row="1"
-                                     Text="Sample Page" 
-                                     PlaceholderText="Page name" 
-                                     TextChanged="TextBox_NameChanged"
-                                     Header="Page Name">
+                         Text="{Binding Name, Mode=TwoWay}" 
+                         PlaceholderText="Page name" 
+                         TextChanged="TextBox_NameChanged"
+                         Header="Page Name">
                                 <TextBox.HeaderTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -163,16 +164,15 @@
                                 </TextBox.HeaderTemplate>
                             </TextBox>
 
-                            <!-- HTML Content -->
+                            <!-- HTML Content - BOUND TO DATA -->
                             <TextBox Grid.Row="2"
-                                     Height="160" 
-                                     AcceptsReturn="True" 
-                                     TextWrapping="Wrap" 
-                                     TextChanged="TextBox_TextChanged"
-                                     Text="&lt;!DOCTYPE html&gt;&#xD;&#xA;&lt;html&gt;&#xD;&#xA;&lt;head&gt;&#xD;&#xA;    &lt;title&gt;Sample Page&lt;/title&gt;&#xD;&#xA;&lt;/head&gt;&#xD;&#xA;&lt;body&gt;&#xD;&#xA;    &lt;h1&gt;Welcome to My HTML Page&lt;/h1&gt;&#xD;&#xA;    &lt;p&gt;This is a sample paragraph with proper line breaks.&lt;/p&gt;&#xD;&#xA;&lt;/body&gt;&#xD;&#xA;&lt;/html&gt;&#xD;&#xA;"
-                                     FontFamily="Consolas"
-                                     
-                                     Header="HTML Content">
+                         Height="160" 
+                         AcceptsReturn="True" 
+                         TextWrapping="Wrap" 
+                         TextChanged="TextBox_TextChanged"
+                         Text="{Binding Content, Mode=TwoWay}"
+                         FontFamily="Consolas"
+                         Header="HTML Content">
                                 <TextBox.HeaderTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="4">

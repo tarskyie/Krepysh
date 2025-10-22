@@ -66,7 +66,6 @@ namespace SDATweb
 
         private void NewPage(object sender, RoutedEventArgs e)
         {
-            lb_pages.Items.Add(1);
             string contentOfThePage = """
                 <!DOCTYPE html>
                 <html>
@@ -80,7 +79,23 @@ namespace SDATweb
                 </html>
                 """;
             string nameOfThePage = "Sample Page";
+
+            // add to data model first
             websiteDataModel.AddNewPage(contentOfThePage, nameOfThePage);
+
+            // add actual data object instead of placeholder
+            lb_pages.Items.Add(new PageItem { Name = nameOfThePage, Content = contentOfThePage });
+        }
+
+        private void RemovePage(object sender, RoutedEventArgs e)
+        {
+            if (lb_pages.SelectedIndex != -1)
+            {
+                int idx = lb_pages.SelectedIndex;
+                // remove from the data model as well
+                websiteDataModel.RemovePage(idx);
+                lb_pages.Items.RemoveAt(idx);
+            }
         }
 
         private async void SendRequest(object sender, RoutedEventArgs e)
@@ -295,8 +310,15 @@ namespace SDATweb
 
                     if (listBox != null)
                     {
-                        // real action here
                         int index = listBox.ItemContainerGenerator.IndexFromContainer(listBoxItem);
+
+                        // Update the PageItem object
+                        if (listBox.Items[index] is PageItem pageItem)
+                        {
+                            pageItem.Content = textBox.Text;
+                        }
+
+                        // Update the data model
                         if (index < websiteDataModel.PagesContent.Count)
                         {
                             websiteDataModel.UpdatePageContent(index, textBox.Text);
@@ -309,6 +331,7 @@ namespace SDATweb
                 }
             }
         }
+
         private void TextBox_NameChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is TextBox textBox)
@@ -325,8 +348,15 @@ namespace SDATweb
 
                     if (listBox != null)
                     {
-                        // real action here
                         int index = listBox.ItemContainerGenerator.IndexFromContainer(listBoxItem);
+
+                        // Update the PageItem object
+                        if (listBox.Items[index] is PageItem pageItem)
+                        {
+                            pageItem.Name = textBox.Text;
+                        }
+
+                        // Update the data model
                         if (index < websiteDataModel.PagesName.Count)
                         {
                             websiteDataModel.UpdatePageName(index, textBox.Text);
@@ -566,10 +596,15 @@ namespace SDATweb
                     lb_pages.Items.Clear();
                     lb_assets.Items.Clear();
 
+                    // Add pages with actual data from JSON
                     foreach (var p in cfg.Pages)
                     {
                         websiteDataModel.AddNewPage(p.Content ?? "", p.Name ?? "Page");
-                        lb_pages.Items.Add(1);
+                        lb_pages.Items.Add(new PageItem
+                        {
+                            Name = p.Name ?? "Page",
+                            Content = p.Content ?? ""
+                        });
                     }
 
                     foreach (var a in cfg.Assets)

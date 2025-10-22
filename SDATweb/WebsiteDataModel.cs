@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,6 +18,16 @@ namespace SDATweb
         {
             PagesContent.Add(content);
             PagesName.Add(name);
+        }
+
+        // Remove a page at the specified index (removes both name and content)
+        public void RemovePage(int index)
+        {
+            if (index >= 0 && index < PagesContent.Count && index < PagesName.Count)
+            {
+                PagesContent.RemoveAt(index);
+                PagesName.RemoveAt(index);
+            }
         }
 
         public void UpdatePageContent(int index, string content)
@@ -51,5 +62,11 @@ namespace SDATweb
         {
             Assets.Clear();
         }
+    }
+
+    public class PageItem
+    {
+        public string Name { get; set; } = "Sample Page";
+        public string Content { get; set; } = "<!DOCTYPE html>\n<html>\n<head>\n    <title>Sample Page</title>\n</head>\n<body>\n    <h1>Welcome to My HTML Page</h1>\n    <p>This is a sample paragraph with proper line breaks.</p>\n</body>\n</html>";
     }
 }
