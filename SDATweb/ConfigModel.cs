@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SDATweb
 {
@@ -16,6 +17,12 @@ namespace SDATweb
         public string IconPath { get; set; } = "";
         public List<PageInfo> Pages { get; set; } = new List<PageInfo>();
         public List<AssetInfo> Assets { get; set; } = new List<AssetInfo>();
+    }
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(ConfigModel))] 
+    [JsonSerializable(typeof(List<ConfigModel>))] 
+    internal partial class SourceGenerationContext : JsonSerializerContext
+    {
     }
 
     public class PageInfo

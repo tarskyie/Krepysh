@@ -548,13 +548,13 @@ namespace SDATweb
             {
                 Directory.CreateDirectory(deployFolder);
                 string configPath = Path.Combine(deployFolder, "config.json");
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string json = JsonSerializer.Serialize(cfg, options);
+                string json = JsonSerializer.Serialize(cfg, SourceGenerationContext.Default.ConfigModel);
                 await File.WriteAllTextAsync(configPath, json);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"SaveConfig error: {ex.Message}");
+                urlBox.Text = ex.Message;
                 throw;
             }
         }
@@ -572,7 +572,7 @@ namespace SDATweb
                 }
 
                 string json = await File.ReadAllTextAsync(configPath);
-                var cfg = JsonSerializer.Deserialize<ConfigModel>(json);
+                var cfg = JsonSerializer.Deserialize<ConfigModel>(json, SourceGenerationContext.Default.ConfigModel);
                 if (cfg == null)
                     return;
 
