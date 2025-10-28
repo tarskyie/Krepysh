@@ -19,7 +19,7 @@ namespace SDATweb
         private FilePickerService filePickerService = new FilePickerService();
         private HttpRequestSender requestSender = new HttpRequestSender();
         private SystemProcessLauncher processLauncher = new SystemProcessLauncher();
-        private const string systemPrompt = "Only answer in html, do not comment. Always start with <html> and end with </html>. Available assets: ";
+        private const string systemPrompt = "Only answer in html, do not comment. Always start with <html> and end with </html>. Do not format it as markdown. Do NOT include in reply anything else than html markup code. Available assets: ";
         private string apiKey = "";
         private string apiUrl = "http://127.0.0.1:8080/v1/chat/completions";
         private string appName = "My Website";
@@ -100,25 +100,110 @@ namespace SDATweb
 
         private async void SendRequest(object sender, RoutedEventArgs e)
         {
-            Button sendButton = (Button)sender;
+            // Robustly find the related textboxes for the ListBox item that contains the clicked button.
+            if (sender is not Button sendButton)
+                return;
 
-            if (sendButton != null)
+            // Find the ListBoxItem container
+            DependencyObject current = sendButton;
+            while (current != null && current is not ListBoxItem)
             {
-                StackPanel parentPanel = (StackPanel)sendButton.Parent;
+                current = VisualTreeHelper.GetParent(current);
+            }
 
-                if (parentPanel != null)
+            if (current is not ListBoxItem listBoxItem)
+            {
+                // fallback: try to find within the whole listbox selected item
+                if (lb_pages.SelectedItem is PageItem selectedPage)
                 {
-                    TextBox smallerTextBox = (TextBox)parentPanel.Children[0];
-                    StackPanel outerPanel = (StackPanel)parentPanel.Parent;
-                    TextBox largerTextBox = (TextBox)outerPanel.Children[2];
+                    // send request using the selected page's content textbox if possible
+                    string prompt = string.Empty;
+                    string response = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, prompt, systemPrompt + FileNames());
+                    // no UI textbox to update in this fallback
+                }
+                return;
+            }
 
-                    if (smallerTextBox != null && largerTextBox != null)
+            // Find all TextBox descendants inside the ListBoxItem
+            var textBoxes = FindDescendants<TextBox>(listBoxItem);
+
+            TextBox? promptBox = null;
+            TextBox? contentBox = null;
+
+            // Heuristic: contentBox in template has Height=160, so pick that as contentBox
+            foreach (var tb in textBoxes)
+            {
+                if (Math.Abs(tb.Height -160) <0.1)
+                {
+                    contentBox = tb;
+                }
+                else if (string.Equals(tb.PlaceholderText, "Enter AI prompt...", StringComparison.OrdinalIgnoreCase))
+                {
+                    promptBox = tb;
+                }
+            }
+
+            // fallback assignments
+            if (contentBox == null)
+            {
+                // try to pick the largest textbox by ActualHeight
+                foreach (var tb in textBoxes)
+                {
+                    if (contentBox == null || tb.ActualHeight > contentBox.ActualHeight)
+                        contentBox = tb;
+                }
+            }
+
+            if (promptBox == null)
+            {
+                // pick the first textbox that is not the contentBox
+                foreach (var tb in textBoxes)
+                {
+                    if (tb != contentBox)
                     {
-                        largerTextBox.Text = "Waiting for response...";
-                        largerTextBox.Text = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, smallerTextBox.Text, systemPrompt + FileNames());
+                        promptBox = tb;
+                        break;
                     }
                 }
             }
+
+            if (promptBox == null || contentBox == null)
+                return;
+
+            contentBox.Text = "Waiting for response...";
+            try
+            {
+                contentBox.Text = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, promptBox.Text, systemPrompt + FileNames());
+            }
+            catch (Exception ex)
+            {
+                contentBox.Text = $"Error: {ex.Message}";
+            }
+        }
+
+        // Helper to find descendants of a specific type
+        private static List<T> FindDescendants<T>(DependencyObject root) where T : DependencyObject
+        {
+            var results = new List<T>();
+            if (root == null) return results;
+
+            var queue = new Queue<DependencyObject>();
+            queue.Enqueue(root);
+
+            while (queue.Count >0)
+            {
+                var current = queue.Dequeue();
+                int childCount = VisualTreeHelper.GetChildrenCount(current);
+                for (int i =0; i < childCount; i++)
+                {
+                    var child = VisualTreeHelper.GetChild(current, i);
+                    if (child is T t)
+                        results.Add(t);
+                    queue.Enqueue(child);
+                }
+            }
+
+            return results;
         }
 
         private async void BuildWebsite(object sender, RoutedEventArgs e)
