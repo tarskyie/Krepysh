@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SDATweb", "SDATweb\SDATweb.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrepyshLocalServer", "WebApplication1\KrepyshLocalServer.csproj", "{7C248C04-067A-42E7-98D3-BB56B8996521}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KrepyshMgr", "KrepyshMgr\KrepyshMgr.csproj", "{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM64 = Debug|ARM64
@@ -47,6 +49,18 @@ Global
 		{7C248C04-067A-42E7-98D3-BB56B8996521}.Release|x64.Build.0 = Release|Any CPU
 		{7C248C04-067A-42E7-98D3-BB56B8996521}.Release|x86.ActiveCfg = Release|Any CPU
 		{7C248C04-067A-42E7-98D3-BB56B8996521}.Release|x86.Build.0 = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|ARM64.ActiveCfg = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|ARM64.Build.0 = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|x64.Build.0 = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Debug|x86.Build.0 = Debug|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|ARM64.ActiveCfg = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|ARM64.Build.0 = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|x64.ActiveCfg = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|x64.Build.0 = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|x86.ActiveCfg = Release|Any CPU
+		{0A4488C8-70AF-42BC-9D58-3C00A2ED6366}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -39,7 +39,9 @@ namespace SDATweb
                 if (args[i] == "-url" && i + 1 < args.Length) { apiUrl = args[i + 1]; }
                 if (args[i] == "-name" && i + 1 < args.Length) { 
                     appName = args[i + 1];
-                    deployFolder.Replace("site", args[i + 1]);
+                }
+                if (args[i] == "-path" && i + 1 < args[i].Length) {
+                    deployFolder = args[i+1];
                     assetsFolder = Path.Combine(deployFolder, "assets");
                 }
             }
