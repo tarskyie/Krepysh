@@ -37,11 +37,13 @@ namespace SDATweb
             {
                 if (args[i] == "-key" && i + 1 < args.Length) { apiKey = args[i + 1]; }
                 if (args[i] == "-url" && i + 1 < args.Length) { apiUrl = args[i + 1]; }
-                if (args[i] == "-name" && i + 1 < args.Length) { 
+                if (args[i] == "-name" && i + 1 < args.Length)
+                {
                     appName = args[i + 1];
                 }
-                if (args[i] == "-path" && i + 1 < args[i].Length) {
-                    deployFolder = args[i+1];
+                if (args[i] == "-path" && i + 1 < args[i].Length)
+                {
+                    deployFolder = args[i + 1];
                     assetsFolder = Path.Combine(deployFolder, "assets");
                 }
             }
@@ -135,7 +137,7 @@ namespace SDATweb
             // Heuristic: contentBox in template has Height=160, so pick that as contentBox
             foreach (var tb in textBoxes)
             {
-                if (Math.Abs(tb.Height -160) <0.1)
+                if (Math.Abs(tb.Height - 160) < 0.1)
                 {
                     contentBox = tb;
                 }
@@ -192,11 +194,11 @@ namespace SDATweb
             var queue = new Queue<DependencyObject>();
             queue.Enqueue(root);
 
-            while (queue.Count >0)
+            while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
                 int childCount = VisualTreeHelper.GetChildrenCount(current);
-                for (int i =0; i < childCount; i++)
+                for (int i = 0; i < childCount; i++)
                 {
                     var child = VisualTreeHelper.GetChild(current, i);
                     if (child is T t)
@@ -304,7 +306,7 @@ namespace SDATweb
                 indexContent.AppendLine("</html>");
             }
 
-                string indexFileName = Path.Combine(deployFolder, "index.html");
+            string indexFileName = Path.Combine(deployFolder, "index.html");
             try
             {
                 File.WriteAllText(indexFileName, indexContent.ToString());
@@ -347,7 +349,7 @@ namespace SDATweb
             }
         }
 
-        private void copyAssets() 
+        private void copyAssets()
         {
             try
             {
@@ -489,7 +491,8 @@ namespace SDATweb
         {
             BuildWebsite(sender, e);
 
-            if (useLocalServer) {
+            if (useLocalServer)
+            {
                 string index = await StartServer();
 
                 processLauncher.GenericStartProcess(edgePath, index);
@@ -506,7 +509,7 @@ namespace SDATweb
             StorageFile file = await filePickerService.SelectFile([".png"], hWnd);
             if (file != null)
             {
-                iconBox.Text=file.Path;
+                iconBox.Text = file.Path;
             }
         }
 
@@ -553,11 +556,11 @@ namespace SDATweb
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "LocalServer\\KrepyshLocalServer.exe", 
-                    Arguments = $"-port {appPort} -folder {deployFolder}", 
-                    RedirectStandardOutput = true, 
-                    UseShellExecute = false, 
-                    CreateNoWindow = true 
+                    FileName = "LocalServer\\KrepyshLocalServer.exe",
+                    Arguments = $"-port {appPort} -folder {deployFolder}",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
                 }
             };
 
