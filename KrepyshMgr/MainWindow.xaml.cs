@@ -1,7 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,7 +10,7 @@ namespace KrepyshMgr
 {
     public partial class MainWindow : Window
     {
-        private const string DataFile = "projects.json";
+        private string DataFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\projects.json");
         public ObservableCollection<ProjectItem> Projects { get; } = new();
 
         public MainWindow()
@@ -58,7 +58,6 @@ namespace KrepyshMgr
                     if (!string.IsNullOrEmpty(newName) && !Projects.Any(x => x != p && x.Name == newName))
                     {
                         p.Name = newName;
-                        // Refresh selection to update DisplayMemberPath binding, although INotifyPropertyChanged will handle it.
                         ProjectsListBox.Items.Refresh();
                         SaveProjects();
                     }
@@ -97,10 +96,17 @@ namespace KrepyshMgr
         {
             try
             {
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh")))
+                {
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh"));
+                }
                 var json = JsonSerializer.Serialize(Projects.ToArray());
                 File.WriteAllText(DataFile, json);
             }
-            catch { }
+            catch (Exception e)
+            {
+                StatusTextBlock.Text = e.Message;
+            }
         }
 
         private void OpenProject(object sender, RoutedEventArgs e)
@@ -108,21 +114,35 @@ namespace KrepyshMgr
             if (ProjectsListBox.SelectedIndex != -1)
             {
                 int idx = ProjectsListBox.SelectedIndex;
-                string arguments = $"-path {Projects[idx].Path} -name {Projects[idx].Name} -url {ApiUrlTextBox.Text} -key {ApiKeyTextBox.Text}";
+                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Text}\"";
                 StatusTextBlock.Text = arguments;
+
+                try
+                {
+                    using (Process redactorProcess = new Process())
+                    {
+                        redactorProcess.StartInfo.FileName = "SDATweb\\SDATweb.exe";
+                        redactorProcess.StartInfo.Arguments = arguments;
+                        redactorProcess.Start();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = ex.Message;
+                }
             }
         }
     }
 
     public class ProjectItem : INotifyPropertyChanged
     {
-        private string name;
-        private string path;
+        private string? name;
+        private string? path;
 
-        public string Name { get => name; set { if (name != value) { name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } } }
-        public string Path { get => path; set { if (path != value) { path = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path))); } } }
-        public override string ToString() => Name;
+        public string? Name { get => name; set { if (name != value) { name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name))); } } }
+        public string? Path { get => path; set { if (path != value) { path = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Path))); } } }
+        public override string? ToString() => Name;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
     }
 }
