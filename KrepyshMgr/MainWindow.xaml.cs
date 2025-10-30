@@ -44,6 +44,17 @@ namespace KrepyshMgr
             {
                 Projects.Remove(p);
                 SaveProjects();
+
+                try
+                {
+                    DirectoryInfo di = new DirectoryInfo(p.Path);
+
+                    di.Delete(true);
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = ex.Message;
+                }
             }
         }
 
