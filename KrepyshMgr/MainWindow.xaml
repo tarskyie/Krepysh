@@ -25,6 +25,14 @@
                 <TextBox x:Name="ApiUrlTextBox" Text="http://127.0.0.1:8080/v1/chat/completions" />
                 <TextBlock>Api Url</TextBlock>
                 <TextBox x:Name="ApiKeyTextBox" />
+                <!-- Deployment, under construction-->
+                <TextBlock>Deployment</TextBlock>
+                <TextBlock><Hyperlink NavigateUri="https://info.ivantarsky.ru" RequestNavigate="Hyperlink_RequestNavigate">Инструкция</Hyperlink></TextBlock>
+                <StackPanel Orientation="Vertical" IsEnabled="False">
+
+                    <TextBox />
+                </StackPanel>
+                <!-- -->
                 <TextBlock x:Name="StatusTextBlock" Margin="0,8,0,0" TextWrapping="Wrap" />
             </StackPanel>
         </ScrollViewer>

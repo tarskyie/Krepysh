@@ -542,7 +542,7 @@ namespace SDATweb
 
         private bool HasLocalServer()
         {
-            if (File.Exists("LocalServer\\KrepyshLocalServer.exe"))
+            if (File.Exists(Path.Combine(AppContext.BaseDirectory, "LocalServer\\KrepyshLocalServer.exe")))
                 return true;
 
             return false;
@@ -556,7 +556,7 @@ namespace SDATweb
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "LocalServer\\KrepyshLocalServer.exe",
+                    FileName = Path.Combine(AppContext.BaseDirectory, "LocalServer\\KrepyshLocalServer.exe"),
                     Arguments = $"-port {appPort} -folder {deployFolder}",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
@@ -670,13 +670,9 @@ namespace SDATweb
                 deployFolder = string.IsNullOrWhiteSpace(cfg.DeployFolder) ? deployFolder : cfg.DeployFolder;
                 assetsFolder = string.IsNullOrWhiteSpace(cfg.AssetsFolder) ? assetsFolder : cfg.AssetsFolder;
                 appPort = cfg.AppPort;
-                useLocalServer = cfg.UseLocalServer;
-
                 try
                 {
                     if (nameBox != null) nameBox.Text = cfg.AppName ?? nameBox.Text;
-                    if (urlBox != null) urlBox.Text = cfg.ApiUrl ?? urlBox.Text;
-                    if (keyBox != null) keyBox.Password = cfg.ApiKey ?? keyBox.Password;
                     if (cssBox != null) cssBox.Text = cfg.Css ?? cssBox.Text;
                     if (iconBox != null) iconBox.Text = cfg.IconPath ?? iconBox.Text;
                     if (indexToggle != null) indexToggle.IsChecked = cfg.IndexToggle;

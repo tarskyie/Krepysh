@@ -132,8 +132,9 @@ namespace KrepyshMgr
                 {
                     using (Process redactorProcess = new Process())
                     {
-                        redactorProcess.StartInfo.FileName = "SDATweb\\SDATweb.exe";
+                        redactorProcess.StartInfo.FileName = Path.Combine(AppContext.BaseDirectory, "SDATweb\\SDATweb.exe");
                         redactorProcess.StartInfo.Arguments = arguments;
+                        redactorProcess.StartInfo.WorkingDirectory = Path.Combine(AppContext.BaseDirectory, "SDATweb");
                         redactorProcess.Start();
                     }
                 }
@@ -142,6 +143,12 @@ namespace KrepyshMgr
                     StatusTextBlock.Text = ex.Message;
                 }
             }
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+            e.Handled = true;
         }
     }
 
