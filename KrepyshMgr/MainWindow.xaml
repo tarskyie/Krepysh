@@ -23,7 +23,7 @@
                 <Button x:Name="PathButton" Click="OpenProject">Open Project</Button>
                 <TextBlock>Api Url</TextBlock>
                 <TextBox x:Name="ApiUrlTextBox" Text="http://127.0.0.1:8080/v1/chat/completions" />
-                <TextBlock>Api Url</TextBlock>
+                <TextBlock>Api Key</TextBlock>
                 <TextBox x:Name="ApiKeyTextBox" />
                 <!-- Deployment, under construction-->
                 <TextBlock>Deployment</TextBlock>
