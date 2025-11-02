@@ -9,7 +9,7 @@ namespace SDATweb
 {
     public class HttpRequestSender
     {
-        public async Task<string> SendHTTP(string url, string apiKey, string prompt, string systemPrompt)
+        public async Task<string> SendHTTP(string url, string apiKey, string apiModel, string prompt, string systemPrompt)
         {
             const int RETRIES = 1;
 
@@ -32,7 +32,7 @@ namespace SDATweb
                     {
                         var payload = new
                         {
-                            model = "llama-3",
+                            model = apiModel,
                             messages = messages,
                             temperature = 0.7
                         };

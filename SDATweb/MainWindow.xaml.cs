@@ -22,6 +22,7 @@ namespace SDATweb
         private const string systemPrompt = "Only answer in html, do not comment. Always start with <html> and end with </html>. Do not format it as markdown. Do NOT include in reply anything else than html markup code. Available assets: ";
         private string apiKey = "";
         private string apiUrl = "http://127.0.0.1:8080/v1/chat/completions";
+        private string apiModel = "none";
         private string appName = "My Website";
         private string deployFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site";
         private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site\\assets";
@@ -46,6 +47,7 @@ namespace SDATweb
                     deployFolder = args[i + 1];
                     assetsFolder = Path.Combine(deployFolder, "assets");
                 }
+                if (args[i] == "-model" && i + 1 < args.Length) { apiModel = args[i + 1]; }
             }
 
             this.InitializeComponent();
@@ -104,7 +106,6 @@ namespace SDATweb
 
         private async void SendRequest(object sender, RoutedEventArgs e)
         {
-            // Robustly find the related textboxes for the ListBox item that contains the clicked button.
             if (sender is not Button sendButton)
                 return;
 
@@ -117,13 +118,11 @@ namespace SDATweb
 
             if (current is not ListBoxItem listBoxItem)
             {
-                // fallback: try to find within the whole listbox selected item
+                // fallback
                 if (lb_pages.SelectedItem is PageItem selectedPage)
                 {
-                    // send request using the selected page's content textbox if possible
                     string prompt = string.Empty;
-                    string response = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, prompt, systemPrompt + FileNames());
-                    // no UI textbox to update in this fallback
+                    string response = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, apiModel, prompt, systemPrompt + FileNames());
                 }
                 return;
             }
@@ -177,7 +176,7 @@ namespace SDATweb
             contentBox.Text = "Waiting for response...";
             try
             {
-                contentBox.Text = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, promptBox.Text, systemPrompt + FileNames());
+                contentBox.Text = await requestSender.SendHTTP(urlBox.Text, keyBox.Password, apiModel, promptBox.Text, systemPrompt + FileNames());
             }
             catch (Exception ex)
             {

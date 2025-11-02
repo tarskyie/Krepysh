@@ -125,7 +125,7 @@ namespace KrepyshMgr
             if (ProjectsListBox.SelectedIndex != -1)
             {
                 int idx = ProjectsListBox.SelectedIndex;
-                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Text}\"";
+                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Text}\" -model \"{ModelTextBox.Text}\"";
                 StatusTextBlock.Text = arguments;
 
                 try
