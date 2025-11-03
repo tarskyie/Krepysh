@@ -9,6 +9,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Windows.Storage;
 using WinRT.Interop;
+using System.Text;
 
 namespace SDATweb
 {
@@ -26,7 +27,7 @@ namespace SDATweb
         private string appName = "My Website";
         private string deployFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site";
         private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site\\assets";
-        private int appPort = 5500;
+        private int appPort =5500;
         private bool useLocalServer = false;
         private Process? serverProcess;
 
@@ -34,20 +35,20 @@ namespace SDATweb
         {
             string[] args = Environment.GetCommandLineArgs();
 
-            for (int i = 0; i < args.Length; ++i)
+            for (int i =0; i < args.Length; ++i)
             {
-                if (args[i] == "-key" && i + 1 < args.Length) { apiKey = args[i + 1]; }
-                if (args[i] == "-url" && i + 1 < args.Length) { apiUrl = args[i + 1]; }
-                if (args[i] == "-name" && i + 1 < args.Length)
+                if (args[i] == "-key" && i +1 < args.Length) { apiKey = args[i +1]; }
+                if (args[i] == "-url" && i +1 < args.Length) { apiUrl = args[i +1]; }
+                if (args[i] == "-name" && i +1 < args.Length)
                 {
-                    appName = args[i + 1];
+                    appName = args[i +1];
                 }
-                if (args[i] == "-path" && i + 1 < args[i].Length)
+                if (args[i] == "-path" && i +1 < args[i].Length)
                 {
-                    deployFolder = args[i + 1];
+                    deployFolder = args[i +1];
                     assetsFolder = Path.Combine(deployFolder, "assets");
                 }
-                if (args[i] == "-model" && i + 1 < args.Length) { apiModel = args[i + 1]; }
+                if (args[i] == "-model" && i +1 < args.Length) { apiModel = args[i +1]; }
             }
 
             this.InitializeComponent();
@@ -136,7 +137,7 @@ namespace SDATweb
             // Heuristic: contentBox in template has Height=160, so pick that as contentBox
             foreach (var tb in textBoxes)
             {
-                if (Math.Abs(tb.Height - 160) < 0.1)
+                if (Math.Abs(tb.Height -160) <0.1)
                 {
                     contentBox = tb;
                 }
@@ -193,11 +194,11 @@ namespace SDATweb
             var queue = new Queue<DependencyObject>();
             queue.Enqueue(root);
 
-            while (queue.Count > 0)
+            while (queue.Count >0)
             {
                 var current = queue.Dequeue();
                 int childCount = VisualTreeHelper.GetChildrenCount(current);
-                for (int i = 0; i < childCount; i++)
+                for (int i =0; i < childCount; i++)
                 {
                     var child = VisualTreeHelper.GetChild(current, i);
                     if (child is T t)
@@ -224,12 +225,12 @@ namespace SDATweb
                 return;
             }
 
-            File.WriteAllText(Path.Combine(deployFolder, "styles.css"), cssBox.Text);
+            File.WriteAllText(Path.Combine(deployFolder, "styles.css"), cssBox.Text, new UTF8Encoding(true));
 
             // a navigation menu listing all pages
             var navLinks = new System.Text.StringBuilder();
             navLinks.AppendLine("<nav>");
-            for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
+            for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
             {
                 navLinks.AppendLine($"<a href='{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html'>{websiteDataModel.PagesName[i]}</a>");
             }
@@ -237,23 +238,25 @@ namespace SDATweb
             string navHtml = navLinks.ToString();
 
             // write each page with the navigation menu injected
-            for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
+            for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
             {
                 string pageHtml = websiteDataModel.PagesContent[i];
 
                 int headIndex = pageHtml.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
-                if (headIndex >= 0)
+                if (headIndex >=0)
                 {
                     headIndex += "<head>".Length;
-                    pageHtml = pageHtml.Insert(headIndex, "<link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">");
+                    // Insert meta charset and links after <head>
+                    pageHtml = pageHtml.Insert(headIndex, "<meta charset='utf-8'> <link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\"> ");
                 }
                 else
                 {
-                    pageHtml += "<link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">";
+                    // add meta charset and links if no head tag present
+                    pageHtml += "<meta charset='utf-8'> <link rel='icon' type='image/png' href='assets/icon.png'> <link rel=\"stylesheet\" href=\"styles.css\">";
                 }
 
                 int bodyIndex = pageHtml.IndexOf("<body>", StringComparison.OrdinalIgnoreCase);
-                if (bodyIndex >= 0)
+                if (bodyIndex >=0)
                 {
                     bodyIndex += "<body>".Length;
                     pageHtml = pageHtml.Insert(bodyIndex, navHtml);
@@ -266,7 +269,7 @@ namespace SDATweb
                 string pageFileName = Path.Combine(deployFolder, $"{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html");
                 try
                 {
-                    File.WriteAllText(pageFileName, pageHtml);
+                    File.WriteAllText(pageFileName, pageHtml, new UTF8Encoding(true));
                 }
                 catch (Exception ex)
                 {
@@ -276,16 +279,16 @@ namespace SDATweb
 
             // Create an index.html that serves as the landing page with a list of links
             var indexContent = new System.Text.StringBuilder();
-            if (indexToggle.IsChecked == false || websiteDataModel.PagesContent.Count == 0)
+            if (indexToggle.IsChecked == false || websiteDataModel.PagesContent.Count ==0)
             {
                 indexContent.AppendLine("<!DOCTYPE html>");
                 indexContent.AppendLine("<html>");
-                indexContent.AppendLine($"<head><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'><link rel=\"stylesheet\" href=\"styles.css\"></head>");
+                indexContent.AppendLine($"<head><meta charset='utf-8'><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'><link rel=\"stylesheet\" href=\"styles.css\"></head>");
                 indexContent.AppendLine("<body>");
                 indexContent.AppendLine(navHtml);
                 indexContent.AppendLine($"<h1>Welcome to the {nameBox.Text} Home Page</h1>");
                 indexContent.AppendLine("<ul>");
-                for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
+                for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
                 {
                     indexContent.AppendLine($"<li><a href='{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html'>{websiteDataModel.PagesName[i]}</a></li>");
                 }
@@ -297,7 +300,7 @@ namespace SDATweb
             {
                 indexContent.AppendLine("<!DOCTYPE html>");
                 indexContent.AppendLine("<html>");
-                indexContent.AppendLine($"<head><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'><meta http-equiv='refresh' content=\"0; url='{websiteDataModel.PagesName[0].Replace(" ", "")}0.html'\" /></head>");
+                indexContent.AppendLine($"<head><meta charset='utf-8'><title>{nameBox.Text} Home</title><link rel='icon' type='image/png' href='assets/icon.png'><meta http-equiv='refresh' content=\"0; url='{websiteDataModel.PagesName[0].Replace(" ", "")}0.html'\" /></head>");
                 indexContent.AppendLine("<body>");
                 indexContent.AppendLine(navHtml);
                 indexContent.AppendLine($"<h1>Welcome to the {nameBox.Text} Home Page</h1>");
@@ -308,18 +311,18 @@ namespace SDATweb
             string indexFileName = Path.Combine(deployFolder, "index.html");
             try
             {
-                File.WriteAllText(indexFileName, indexContent.ToString());
+                File.WriteAllText(indexFileName, indexContent.ToString(), new UTF8Encoding(true));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error saving file {indexFileName}: {ex.Message}");
             }
 
-            // Create a 404.html page for handling not found routes
+            // Create a404.html page for handling not found routes
             var notFoundContent = new System.Text.StringBuilder();
             notFoundContent.AppendLine("<!DOCTYPE html>");
             notFoundContent.AppendLine("<html>");
-            notFoundContent.AppendLine("<head><title>404 Not Found</title><link rel='icon' type='image/png' href='assets/icon.png'></head>");
+            notFoundContent.AppendLine("<head><meta charset='utf-8'><title>404 Not Found</title><link rel='icon' type='image/png' href='assets/icon.png'></head>");
             notFoundContent.AppendLine("<body>");
             notFoundContent.AppendLine(navHtml);
             notFoundContent.AppendLine("<h1>404 - Page Not Found</h1>");
@@ -330,7 +333,7 @@ namespace SDATweb
             string notFoundFileName = Path.Combine(deployFolder, "404.html");
             try
             {
-                File.WriteAllText(notFoundFileName, notFoundContent.ToString());
+                File.WriteAllText(notFoundFileName, notFoundContent.ToString(), new UTF8Encoding(true));
             }
             catch (Exception ex)
             {
@@ -505,7 +508,7 @@ namespace SDATweb
         private async void SelectIcon(object sender, RoutedEventArgs e)
         {
             IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            StorageFile file = await filePickerService.SelectFile([".png"], hWnd);
+            StorageFile file = await filePickerService.SelectFile(new System.Collections.Generic.List<string> { ".png" }, hWnd);
             if (file != null)
             {
                 iconBox.Text = file.Path;
@@ -521,7 +524,7 @@ namespace SDATweb
         private async void AddAsset(object sender, RoutedEventArgs e)
         {
             IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            StorageFile file = await filePickerService.SelectFile(["*"], hWnd);
+            StorageFile file = await filePickerService.SelectFile(new System.Collections.Generic.List<string> { "*" }, hWnd);
             if (file != null)
             {
                 lb_assets.Items.Add(file.Name);
@@ -623,7 +626,7 @@ namespace SDATweb
                 Assets = new List<AssetInfo>()
             };
 
-            for (int i = 0; i < websiteDataModel.PagesName.Count && i < websiteDataModel.PagesContent.Count; i++)
+            for (int i =0; i < websiteDataModel.PagesName.Count && i < websiteDataModel.PagesContent.Count; i++)
             {
                 cfg.Pages.Add(new PageInfo { Name = websiteDataModel.PagesName[i], Content = websiteDataModel.PagesContent[i] });
             }
@@ -638,7 +641,7 @@ namespace SDATweb
                 Directory.CreateDirectory(deployFolder);
                 string configPath = Path.Combine(deployFolder, "config.json");
                 string json = JsonSerializer.Serialize(cfg, SourceGenerationContext.Default.ConfigModel);
-                await File.WriteAllTextAsync(configPath, json);
+                await File.WriteAllTextAsync(configPath, json, new UTF8Encoding(true));
             }
             catch (Exception ex)
             {

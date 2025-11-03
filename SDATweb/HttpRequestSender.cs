@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace SDATweb
@@ -30,14 +31,14 @@ namespace SDATweb
                 {
                     for (int i = 0; i < RETRIES; i++) 
                     {
-                        var payload = new
+                        ApiPayload payload = new ApiPayload
                         {
                             model = apiModel,
                             messages = messages,
                             temperature = 0.7
                         };
 
-                        string jsonPayload = JsonSerializer.Serialize(payload);
+                        string jsonPayload = JsonSerializer.Serialize(payload, PayloadContext.Default.ApiPayload);
                         var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                         HttpResponseMessage response = await client.PostAsync(url, content);
                         response.EnsureSuccessStatusCode();
@@ -88,5 +89,18 @@ namespace SDATweb
                 }
             }
         }
+    }
+
+    public class ApiPayload
+    {
+        public string model { get; set; } = "";
+        public List<Dictionary<string, string>> messages { get; set; } = new List<Dictionary<string, string>>();
+        public double temperature { get; set; } = 0.7;
+    }
+    [JsonSourceGenerationOptions()]
+    [JsonSerializable(typeof(ApiPayload))]
+    [JsonSerializable(typeof(List<ApiPayload>))]
+    internal partial class PayloadContext : JsonSerializerContext
+    {
     }
 }
