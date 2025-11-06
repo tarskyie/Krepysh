@@ -11,6 +11,7 @@ namespace KrepyshMgr
     public partial class MainWindow : Window
     {
         private string DataFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\projects.json");
+        private string PrefsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\preferences.json");
         public ObservableCollection<ProjectItem> Projects { get; } = new();
 
         public MainWindow()
@@ -99,6 +100,14 @@ namespace KrepyshMgr
                             Projects.Add(item);
                     }
                 }
+                if (File.Exists(PrefsFile))
+                {
+                    var json = File.ReadAllText(PrefsFile);
+                    var oldPrefs = JsonSerializer.Deserialize<Preferences>(json);
+                    ApiUrlTextBox.Text = oldPrefs.apiurl;
+                    ApiKeyTextBox.Password = oldPrefs.apikey;
+                    ModelTextBox.Text = oldPrefs.model;
+                }
             }
             catch { }
         }
@@ -120,12 +129,38 @@ namespace KrepyshMgr
             }
         }
 
+        private void SavePreferences()
+        {
+            if (ApiUrlTextBox == null || ApiKeyTextBox == null || ModelTextBox == null)
+                return;
+
+            try
+            {
+                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh")))
+                {
+                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh"));
+                }
+                Preferences prefs = new Preferences
+                {
+                    apiurl = ApiUrlTextBox.Text,
+                    apikey = ApiKeyTextBox.Password,
+                    model = ModelTextBox.Text
+                };
+                var json = JsonSerializer.Serialize(prefs);
+                File.WriteAllText(PrefsFile, json);
+            }
+            catch (Exception ex)
+            {
+                StatusTextBlock.Text = ex.Message;
+            }
+        }
+
         private void OpenProject(object sender, RoutedEventArgs e)
         {
             if (ProjectsListBox.SelectedIndex != -1)
             {
                 int idx = ProjectsListBox.SelectedIndex;
-                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Text}\" -model \"{ModelTextBox.Text}\"";
+                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Password}\" -model \"{ModelTextBox.Text}\"";
                 StatusTextBlock.Text = arguments;
 
                 try
@@ -150,6 +185,16 @@ namespace KrepyshMgr
             Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
             e.Handled = true;
         }
+
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            SavePreferences();
+        }
+
+        private void ApiKeyTextBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            SavePreferences();
+        }
     }
 
     public class ProjectItem : INotifyPropertyChanged
@@ -162,5 +207,12 @@ namespace KrepyshMgr
         public override string? ToString() => Name;
 
         public event PropertyChangedEventHandler? PropertyChanged;
+    }
+
+    public class Preferences
+    {
+        public string? apiurl { get; set; }
+        public string? apikey { get; set; }
+        public string? model { get; set; }
     }
 }
