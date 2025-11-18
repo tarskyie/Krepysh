@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -48,6 +49,8 @@ namespace KrepyshMgr
 
                 try
                 {
+                    if (p.Path == null || !Directory.Exists(p.Path))
+                        return;
                     DirectoryInfo di = new DirectoryInfo(p.Path);
 
                     di.Delete(true);
@@ -63,6 +66,8 @@ namespace KrepyshMgr
         {
             if (ProjectsListBox.SelectedItem is ProjectItem p)
             {
+                if (!Directory.Exists(p.Path) || p.Name == null) 
+                    return;
                 var dlg = new RenameProjectDialog(p.Name) { Owner = this };
                 if (dlg.ShowDialog() == true)
                 {
@@ -104,9 +109,13 @@ namespace KrepyshMgr
                 {
                     var json = File.ReadAllText(PrefsFile);
                     var oldPrefs = JsonSerializer.Deserialize<Preferences>(json);
-                    ApiUrlTextBox.Text = oldPrefs.apiurl;
-                    ApiKeyTextBox.Password = oldPrefs.apikey;
-                    ModelTextBox.Text = oldPrefs.model;
+                    if (oldPrefs != null)
+                    {
+                        ApiUrlTextBox.Text = oldPrefs.apiurl;
+                        ApiKeyTextBox.Password = oldPrefs.apikey;
+                        ModelTextBox.Text = oldPrefs.model;
+                        RepositoryTextBox.Text = oldPrefs.repository;
+                    }
                 }
             }
             catch { }
@@ -144,7 +153,8 @@ namespace KrepyshMgr
                 {
                     apiurl = ApiUrlTextBox.Text,
                     apikey = ApiKeyTextBox.Password,
-                    model = ModelTextBox.Text
+                    model = ModelTextBox.Text,
+                    repository = RepositoryTextBox.Text
                 };
                 var json = JsonSerializer.Serialize(prefs);
                 File.WriteAllText(PrefsFile, json);
@@ -195,6 +205,35 @@ namespace KrepyshMgr
         {
             SavePreferences();
         }
+
+        private void DeployButton_Click(object sender, RoutedEventArgs e)
+        {
+            string ?path = Projects[ProjectsListBox.SelectedIndex].Path;
+            if (path != null && Directory.Exists(path))
+            {
+                StatusTextBlock.Text = "Deploying...";
+                try
+                { 
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = "pwsh",
+                        Arguments = $"deploy.ps1 -path {path} -repo {RepositoryTextBox.Text}",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    using (Process deployProcess = new Process{ StartInfo = startInfo })
+                    {
+                        deployProcess.Start();
+                        deployProcess.WaitForExit();
+                    }
+                    StatusTextBlock.Text = "Deployment completed.";
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = ex.Message;
+                }
+            }
+        }
     }
 
     public class ProjectItem : INotifyPropertyChanged
@@ -214,5 +253,6 @@ namespace KrepyshMgr
         public string? apiurl { get; set; }
         public string? apikey { get; set; }
         public string? model { get; set; }
+        public string? repository { get; set; }
     }
 }
