@@ -6,6 +6,8 @@ namespace SDATweb
     public class ConfigModel
     {
         public string AppName { get; set; } = "";
+        // Do not serialize the API key to disk
+        [JsonIgnore]
         public string ApiKey { get; set; } = "";
         public string ApiUrl { get; set; } = "";
         public string DeployFolder { get; set; } = "";
