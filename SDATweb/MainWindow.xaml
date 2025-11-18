@@ -28,7 +28,7 @@
         <!-- Title Bar -->
         <Grid x:Name="AppTitleBar" Grid.Row="0" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="8,0">
-                <Image Source="Assets/WebLogo.png"
+                <Image Source="/Assets/AppIcon.png"
                        Width="16" Height="16" 
                        Margin="0,0,12,0"/>
                 <TextBlock x:Name="AppTitleTextBlock" 
