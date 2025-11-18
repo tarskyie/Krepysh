@@ -45,6 +45,13 @@ namespace KrepyshLocalServer
                 RequestPath = ""
             });
 
+            app.MapGet("/health", () => Results.Ok("Server is running"))
+               .AddEndpointFilter(async (context, next) =>
+               {
+                   Console.WriteLine($"Health check at {DateTime.UtcNow}");
+                   return await next(context);
+               });
+
             Console.WriteLine($"*SUC http://localhost:{port}");
 
             app.Run();
