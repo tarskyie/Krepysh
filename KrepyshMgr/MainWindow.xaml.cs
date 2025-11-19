@@ -171,7 +171,7 @@ namespace KrepyshMgr
             {
                 int idx = ProjectsListBox.SelectedIndex;
                 string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Password}\" -model \"{ModelTextBox.Text}\"";
-                StatusTextBlock.Text = arguments;
+                StatusTextBlock.Text = "Attempting to launch SDATweb.";
 
                 try
                 {
@@ -182,6 +182,7 @@ namespace KrepyshMgr
                         redactorProcess.StartInfo.WorkingDirectory = Path.Combine(AppContext.BaseDirectory, "SDATweb");
                         redactorProcess.Start();
                     }
+                    StatusTextBlock.Text = "Opened project in SDATweb.";
                 }
                 catch (Exception ex)
                 {
