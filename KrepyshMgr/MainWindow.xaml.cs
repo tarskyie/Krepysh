@@ -66,7 +66,7 @@ namespace KrepyshMgr
         {
             if (ProjectsListBox.SelectedItem is ProjectItem p)
             {
-                if (!Directory.Exists(p.Path) || p.Name == null) 
+                if (p.Name == null)
                     return;
                 var dlg = new RenameProjectDialog(p.Name) { Owner = this };
                 if (dlg.ShowDialog() == true)
