@@ -46,8 +46,7 @@
                     <FontIcon Glyph="&#xE774;"/>
                 </AppBarButton.Icon>
             </AppBarButton>
-            <AppBarButton Icon="Save" Label="Build &amp; save" Click="BuildWebsite" 
-                          Style="{StaticResource AppBarButtonRevealStyle}"/>
+            <AppBarButton Icon="Save" Label="Build &amp; save" Click="BuildWebsite"/>
             <AppBarButton Icon="Add" Label="New page" Click="NewPage"/>
             <AppBarButton Icon="Remove" Label="Remove page" Click="RemovePage"/>
             <AppBarButton Icon="Delete" Label="Clear" Click="ClearItems"/>
@@ -103,11 +102,17 @@
                        Margin="4,0,0,8"/>
 
             <ListBox x:Name="lb_pages" 
-                 Grid.Row="1"
-                 CornerRadius="8"
-                 BorderThickness="1"
-                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+     Grid.Row="1"
+     CornerRadius="8"
+     BorderThickness="1"
+     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid Margin="0,8" RowSpacing="8">
@@ -116,7 +121,9 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
                             <!-- Prompt Section -->
                             <Grid Grid.Row="0" ColumnSpacing="8">
                                 <Grid.ColumnDefinitions>
@@ -153,7 +160,9 @@
                          Text="{Binding Name, Mode=TwoWay}" 
                          PlaceholderText="Page name" 
                          TextChanged="TextBox_NameChanged"
-                         Header="Page Name">
+                         Header="Page Name"
+                         Grid.Column="0"
+                                     HorizontalAlignment="Stretch">
                                 <TextBox.HeaderTemplate>
                                     <DataTemplate>
                                         <StackPanel Orientation="Horizontal" Spacing="4">
@@ -272,12 +281,42 @@
                                 </Button>
                             </StackPanel>
 
-                            <ListBox x:Name="lb_assets" 
-                                 MinHeight="200"
-                                 MaxHeight="300"
-                                 CornerRadius="4"
-                                 BorderThickness="1"
-                                 BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"/>
+                            <!-- Drop Zone for Assets -->
+                            <Border x:Name="dropZone"
+                                    MinHeight="200"
+                                    MaxHeight="300"
+                                    CornerRadius="4"
+                                    BorderThickness="2"
+                                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                                    AllowDrop="True"
+                                    DragOver="DropZone_DragOver"
+                                    Drop="DropZone_Drop"
+                                    DragEnter="DropZone_DragEnter"
+                                    DragLeave="DropZone_DragLeave">
+                                <Grid>
+                                    <!-- Placeholder Text -->
+                                    <StackPanel x:Name="placeholderText"
+                                              HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Spacing="8"
+                                              Visibility="Collapsed">
+                                        <FontIcon Glyph="&#xE8B7;" 
+                                                FontSize="32"
+                                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Drop files here"
+                                                 Style="{StaticResource BodyTextBlockStyle}"
+                                                 Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                 HorizontalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Assets ListBox -->
+                                    <ListBox x:Name="lb_assets"
+                                           Background="Transparent"
+                                           BorderThickness="0"/>
+                                </Grid>
+                            </Border>
                         </StackPanel>
                     </muxc:Expander>
 

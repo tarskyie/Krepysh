@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Windows.Storage;
 using WinRT.Interop;
 using System.Text;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace SDATweb
 {
@@ -27,28 +28,29 @@ namespace SDATweb
         private string appName = "My Website";
         private string deployFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site";
         private string assetsFolder = $"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\\Krepysh\\site\\assets";
-        private int appPort =5500;
+        private int appPort = 5500;
         private bool useLocalServer = false;
         private Process? serverProcess;
+        private bool isDraggingOver = false;
 
         public MainWindow()
         {
             string[] args = Environment.GetCommandLineArgs();
 
-            for (int i =0; i < args.Length; ++i)
+            for (int i = 0; i < args.Length; ++i)
             {
-                if (args[i] == "-key" && i +1 < args.Length) { apiKey = args[i +1]; }
-                if (args[i] == "-url" && i +1 < args.Length) { apiUrl = args[i +1]; }
-                if (args[i] == "-name" && i +1 < args.Length)
+                if (args[i] == "-key" && i + 1 < args.Length) { apiKey = args[i + 1]; }
+                if (args[i] == "-url" && i + 1 < args.Length) { apiUrl = args[i + 1]; }
+                if (args[i] == "-name" && i + 1 < args.Length)
                 {
-                    appName = args[i +1];
+                    appName = args[i + 1];
                 }
-                if (args[i] == "-path" && i +1 < args[i].Length)
+                if (args[i] == "-path" && i + 1 < args[i].Length)
                 {
-                    deployFolder = args[i +1];
+                    deployFolder = args[i + 1];
                     assetsFolder = Path.Combine(deployFolder, "assets");
                 }
-                if (args[i] == "-model" && i +1 < args.Length) { apiModel = args[i +1]; }
+                if (args[i] == "-model" && i + 1 < args.Length) { apiModel = args[i + 1]; }
             }
 
             this.InitializeComponent();
@@ -64,12 +66,120 @@ namespace SDATweb
             _ = LoadConfig();
 
             this.Closed += MainWindow_Closed;
+
+            // Update placeholder visibility on load
+            UpdatePlaceholderVisibility();
         }
 
         private void MainWindow_Closed(object sender, WindowEventArgs args)
         {
             StopServer();
         }
+
+        #region Drag and Drop Event Handlers
+
+        private void DropZone_DragEnter(object sender, DragEventArgs e)
+        {
+            isDraggingOver = true;
+
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                e.AcceptedOperation = DataPackageOperation.Copy;
+
+                // Visual feedback - change border
+                if (sender is Border border)
+                {
+                    border.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"];
+                    border.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LayerFillColorAltBrush"];
+                }
+            }
+
+            e.Handled = true;
+        }
+
+        private void DropZone_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                e.AcceptedOperation = DataPackageOperation.Copy;
+                e.DragUIOverride.Caption = "Add assets";
+                e.DragUIOverride.IsCaptionVisible = true;
+                e.DragUIOverride.IsContentVisible = true;
+                e.DragUIOverride.IsGlyphVisible = true;
+            }
+
+            e.Handled = true;
+        }
+
+        private void DropZone_DragLeave(object sender, DragEventArgs e)
+        {
+            isDraggingOver = false;
+
+            // Reset visual feedback
+            if (sender is Border border)
+            {
+                border.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["ControlStrokeColorDefaultBrush"];
+                border.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LayerFillColorDefaultBrush"];
+            }
+
+            e.Handled = true;
+        }
+
+        private async void DropZone_Drop(object sender, DragEventArgs e)
+        {
+            isDraggingOver = false;
+
+            // Reset visual feedback
+            if (sender is Border border)
+            {
+                border.BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["ControlStrokeColorDefaultBrush"];
+                border.Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["LayerFillColorDefaultBrush"];
+            }
+
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+
+                foreach (var item in items)
+                {
+                    if (item is StorageFile file)
+                    {
+                        // Check if file already exists in the list
+                        bool exists = false;
+                        foreach (var existingItem in lb_assets.Items)
+                        {
+                            if (existingItem.ToString() == file.Name)
+                            {
+                                exists = true;
+                                break;
+                            }
+                        }
+
+                        if (!exists)
+                        {
+                            lb_assets.Items.Add(file.Name);
+                            websiteDataModel.AddAsset(file);
+                        }
+                    }
+                }
+
+                UpdatePlaceholderVisibility();
+            }
+
+            e.Handled = true;
+        }
+
+        private void UpdatePlaceholderVisibility()
+        {
+            if (placeholderText != null)
+            {
+                placeholderText.Visibility = lb_assets.Items.Count == 0 && !isDraggingOver
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
+        }
+
+        #endregion
 
         private void NewPage(object sender, RoutedEventArgs e)
         {
@@ -81,7 +191,6 @@ namespace SDATweb
                 </head>
                 <body>
                     <h1>Welcome to My HTML Page</h1>
-                    <p>This is a sample paragraph with proper line breaks.</p>
                 </body>
                 </html>
                 """;
@@ -137,7 +246,7 @@ namespace SDATweb
             // Heuristic: contentBox in template has Height=160, so pick that as contentBox
             foreach (var tb in textBoxes)
             {
-                if (Math.Abs(tb.Height -160) <0.1)
+                if (Math.Abs(tb.Height - 160) < 0.1)
                 {
                     contentBox = tb;
                 }
@@ -194,11 +303,11 @@ namespace SDATweb
             var queue = new Queue<DependencyObject>();
             queue.Enqueue(root);
 
-            while (queue.Count >0)
+            while (queue.Count > 0)
             {
                 var current = queue.Dequeue();
                 int childCount = VisualTreeHelper.GetChildrenCount(current);
-                for (int i =0; i < childCount; i++)
+                for (int i = 0; i < childCount; i++)
                 {
                     var child = VisualTreeHelper.GetChild(current, i);
                     if (child is T t)
@@ -230,7 +339,7 @@ namespace SDATweb
             // a navigation menu listing all pages
             var navLinks = new System.Text.StringBuilder();
             navLinks.AppendLine("<nav>");
-            for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
+            for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
             {
                 navLinks.AppendLine($"<a href='{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html'>{websiteDataModel.PagesName[i]}</a>");
             }
@@ -238,12 +347,12 @@ namespace SDATweb
             string navHtml = navLinks.ToString();
 
             // write each page with the navigation menu injected
-            for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
+            for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
             {
                 string pageHtml = websiteDataModel.PagesContent[i];
 
                 int headIndex = pageHtml.IndexOf("<head>", StringComparison.OrdinalIgnoreCase);
-                if (headIndex >=0)
+                if (headIndex >= 0)
                 {
                     headIndex += "<head>".Length;
                     // Insert meta charset and links after <head>
@@ -256,7 +365,7 @@ namespace SDATweb
                 }
 
                 int bodyIndex = pageHtml.IndexOf("<body>", StringComparison.OrdinalIgnoreCase);
-                if (bodyIndex >=0)
+                if (bodyIndex >= 0)
                 {
                     bodyIndex += "<body>".Length;
                     pageHtml = pageHtml.Insert(bodyIndex, navHtml);
@@ -279,7 +388,7 @@ namespace SDATweb
 
             // Create an index.html that serves as the landing page with a list of links
             var indexContent = new System.Text.StringBuilder();
-            if (indexToggle.IsChecked == false || websiteDataModel.PagesContent.Count ==0)
+            if (indexToggle.IsChecked == false || websiteDataModel.PagesContent.Count == 0)
             {
                 indexContent.AppendLine("<!DOCTYPE html>");
                 indexContent.AppendLine("<html>");
@@ -288,7 +397,7 @@ namespace SDATweb
                 indexContent.AppendLine(navHtml);
                 indexContent.AppendLine($"<h1>Welcome to the {nameBox.Text} Home Page</h1>");
                 indexContent.AppendLine("<ul>");
-                for (int i =0; i < websiteDataModel.PagesContent.Count; i++)
+                for (int i = 0; i < websiteDataModel.PagesContent.Count; i++)
                 {
                     indexContent.AppendLine($"<li><a href='{websiteDataModel.PagesName[i].Replace(" ", "")}{i}.html'>{websiteDataModel.PagesName[i]}</a></li>");
                 }
@@ -519,6 +628,7 @@ namespace SDATweb
         {
             lb_assets.Items.Clear();
             websiteDataModel.ClearAssets();
+            UpdatePlaceholderVisibility();
         }
 
         private async void AddAsset(object sender, RoutedEventArgs e)
@@ -529,6 +639,7 @@ namespace SDATweb
             {
                 lb_assets.Items.Add(file.Name);
                 websiteDataModel.AddAsset(file);
+                UpdatePlaceholderVisibility();
             }
         }
 
@@ -626,7 +737,7 @@ namespace SDATweb
                 Assets = new List<AssetInfo>()
             };
 
-            for (int i =0; i < websiteDataModel.PagesName.Count && i < websiteDataModel.PagesContent.Count; i++)
+            for (int i = 0; i < websiteDataModel.PagesName.Count && i < websiteDataModel.PagesContent.Count; i++)
             {
                 cfg.Pages.Add(new PageInfo { Name = websiteDataModel.PagesName[i], Content = websiteDataModel.PagesContent[i] });
             }
@@ -714,6 +825,8 @@ namespace SDATweb
                             Debug.WriteLine($"LoadConfig: failed to add asset '{a.Path}': {exAsset.Message}");
                         }
                     }
+
+                    UpdatePlaceholderVisibility();
                 }
                 catch (Exception exUi)
                 {
