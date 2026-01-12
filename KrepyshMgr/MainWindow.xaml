@@ -29,7 +29,9 @@
                 <TextBox x:Name="ModelTextBox" TextChanged="TextBox_TextChanged" />
                 <!-- Deployment, WIP -->
                 <TextBlock>Deployment</TextBlock>
-                <TextBlock><Hyperlink NavigateUri="https://info.ivantarsky.ru" RequestNavigate="Hyperlink_RequestNavigate">Инструкция</Hyperlink></TextBlock>
+                <!--
+                <TextBlock><Hyperlink NavigateUri="https://www.ivantarsky.ru/project/1" RequestNavigate="Hyperlink_RequestNavigate">Инструкция</Hyperlink></TextBlock>
+                -->
                 <StackPanel Orientation="Vertical">
                     <TextBlock>GitHub Repository URL</TextBlock>
                     <TextBox x:Name="RepositoryTextBox" />
