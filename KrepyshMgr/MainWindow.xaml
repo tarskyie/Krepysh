@@ -21,12 +21,18 @@
                     <Button x:Name="RenameButton" Click="RenameButton_Click" Width="120" IsEnabled="False" Margin="8,0,0,0">Rename project</Button>
                 </StackPanel>
                 <Button x:Name="PathButton" Click="OpenProject">Open Project</Button>
-                <TextBlock>Api Url</TextBlock>
-                <TextBox x:Name="ApiUrlTextBox" Text="http://127.0.0.1:8080/v1/chat/completions" TextChanged="TextBox_TextChanged" />
-                <TextBlock>Api Key</TextBlock>
-                <PasswordBox x:Name="ApiKeyTextBox" PasswordChanged="ApiKeyTextBox_PasswordChanged" />
-                <TextBlock>Model</TextBlock>
-                <TextBox x:Name="ModelTextBox" TextChanged="TextBox_TextChanged" />
+
+                <CheckBox x:Name="UseCustomApiCheckBox" Content="Use custom API" Checked="UseCustomApiCheckBox_Checked" Unchecked="UseCustomApiCheckBox_Unchecked" IsChecked="False" />
+                <Expander x:Name="ApiSettingsExpander" IsEnabled="False" Header="Custom AI settings" >
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock>Api Url</TextBlock>
+                        <TextBox x:Name="ApiUrlTextBox" Text="http://127.0.0.1:8080/v1/chat/completions" TextChanged="TextBox_TextChanged" />
+                        <TextBlock>Api Key</TextBlock>
+                        <PasswordBox x:Name="ApiKeyTextBox" PasswordChanged="ApiKeyTextBox_PasswordChanged" />
+                        <TextBlock>Model</TextBlock>
+                        <TextBox x:Name="ModelTextBox" TextChanged="TextBox_TextChanged" />
+                    </StackPanel>
+                </Expander>
                 <!-- Deployment, WIP -->
                 <TextBlock>Deployment</TextBlock>
                 <!--
