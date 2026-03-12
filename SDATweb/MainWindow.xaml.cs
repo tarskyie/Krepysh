@@ -757,7 +757,10 @@ namespace SDATweb
             catch (Exception ex)
             {
                 Debug.WriteLine($"SaveConfig error: {ex.Message}");
-                urlBox.Text = ex.Message;
+                if (urlBox != null)
+                {
+                    urlBox.Text = ex.Message;
+                }
                 throw;
             }
         }
