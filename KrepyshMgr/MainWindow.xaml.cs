@@ -13,10 +13,6 @@ namespace KrepyshMgr
     {
         private string DataFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\projects.json");
         private string PrefsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\preferences.json");
-
-        private bool useDefaultApi = true;
-        private AppSettings appSettings = new();
-
         public ObservableCollection<ProjectItem> Projects { get; } = new();
 
         public MainWindow()
@@ -174,10 +170,7 @@ namespace KrepyshMgr
             if (ProjectsListBox.SelectedIndex != -1)
             {
                 int idx = ProjectsListBox.SelectedIndex;
-                string apiUrl = useDefaultApi ? appSettings.DefaultApiUrl : ApiUrlTextBox.Text;
-                string apiKey = useDefaultApi ? appSettings.DefaultApiKey : ApiKeyTextBox.Password;
-                string apiModel = useDefaultApi ? appSettings.DefaultApiModel : ModelTextBox.Text;
-                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{apiUrl}\" -key \"{apiKey}\" -model \"{apiModel}\"";
+                string arguments = $"-path \"{Projects[idx].Path}\" -name \"{Projects[idx].Name}\" -url \"{ApiUrlTextBox.Text}\" -key \"{ApiKeyTextBox.Password}\" -model \"{ModelTextBox.Text}\"";
                 StatusTextBlock.Text = "Attempting to launch SDATweb.";
 
                 try
@@ -241,19 +234,6 @@ namespace KrepyshMgr
                     StatusTextBlock.Text = ex.Message;
                 }
             }
-        }
-
-        private void UseCustomApiCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            ApiSettingsExpander.IsEnabled = true;
-            useDefaultApi = false;
-        }
-
-        private void UseCustomApiCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            ApiSettingsExpander.IsEnabled = false;
-            ApiSettingsExpander.IsExpanded = false;
-            useDefaultApi = true;
         }
     }
 

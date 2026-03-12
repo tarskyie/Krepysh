@@ -17,9 +17,11 @@ if (Test-Path ".git") {
 git init
 git remote add origin $repo
 
-if (!(Test-Path ".nojekyll")) {
-    New-Item -ItemType File -Path ".\.nojekyll" -Force | Out-Null
+if (Test-Path ".nojekyll") {
+    Remove-Item -Force ".nojekyll"
 }
+
+New-Item -ItemType File -Path ".\.nojekyll" -Force | Out-Null
 
 git checkout -b gh-pages 
 git add .
