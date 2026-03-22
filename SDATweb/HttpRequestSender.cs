@@ -10,7 +10,7 @@ namespace SDATweb
 {
     public class HttpRequestSender
     {
-        public async Task<string> SendHTTP(string url, string apiKey, string apiModel, string prompt, string systemPrompt)
+        public async Task<string> SendHTTP(string url, string apiKey, string apiModel, string prompt, string systemPrompt, string previousMarkup = "")
         {
             const int RETRIES = 1;
 

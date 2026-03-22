@@ -33,9 +33,10 @@
                 <TextBlock><Hyperlink NavigateUri="https://www.ivantarsky.ru/project/1" RequestNavigate="Hyperlink_RequestNavigate">Инструкция</Hyperlink></TextBlock>
                 -->
                 <StackPanel Orientation="Vertical">
+                    <Button Click="DeployButtonKrepysh_Click">Deploy to the Krepysh server</Button>
                     <TextBlock>GitHub Repository URL</TextBlock>
                     <TextBox x:Name="RepositoryTextBox" />
-                    <Button Click="DeployButton_Click">Deploy to github pages</Button>
+                    <Button Click="DeployButtonGithub_Click">Deploy to github pages</Button>
                 </StackPanel>
                 <!-- -->
                 <TextBlock x:Name="StatusTextBlock" Margin="0,8,0,0" TextWrapping="Wrap" />

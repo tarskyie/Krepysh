@@ -5,6 +5,7 @@ param (
 
 if ($repo -eq "") {
     Write-Error "Repository URL must be provided."
+    Write-Error "failure"
     exit 1
 }
 
@@ -27,3 +28,5 @@ git checkout -b gh-pages
 git add .
 git commit -m "Auto-commit"
 git push -f origin gh-pages
+
+Write-Host "success"

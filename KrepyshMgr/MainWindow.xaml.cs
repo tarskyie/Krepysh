@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -11,6 +12,8 @@ namespace KrepyshMgr
 {
     public partial class MainWindow : Window
     {
+        private const string edgePath = @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";
+
         private string DataFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\projects.json");
         private string PrefsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\preferences.json");
         public ObservableCollection<ProjectItem> Projects { get; } = new();
@@ -207,7 +210,7 @@ namespace KrepyshMgr
             SavePreferences();
         }
 
-        private void DeployButton_Click(object sender, RoutedEventArgs e)
+        private void DeployButtonGithub_Click(object sender, RoutedEventArgs e)
         {
             string ?path = Projects[ProjectsListBox.SelectedIndex].Path;
             if (path != null && Directory.Exists(path))
@@ -218,7 +221,7 @@ namespace KrepyshMgr
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
                         FileName = "pwsh",
-                        Arguments = $"deploy.ps1 -path {path} -repo {RepositoryTextBox.Text}",
+                        Arguments = $"{AppContext.BaseDirectory}\\deploy.ps1 -path \"{path}\"  -repo {RepositoryTextBox.Text}",
                         CreateNoWindow = true,
                         UseShellExecute = false
                     };
@@ -234,6 +237,55 @@ namespace KrepyshMgr
                     StatusTextBlock.Text = ex.Message;
                 }
             }
+        }
+
+        private void DeployButtonKrepysh_Click(object sender, RoutedEventArgs e)
+        {
+            string? path = Projects[ProjectsListBox.SelectedIndex].Path;
+            if (path != null && Directory.Exists(path))
+            {
+                StatusTextBlock.Text = "Deploying...";
+                try
+                {
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = "pwsh",
+                        Arguments = $"{AppContext.BaseDirectory}\\deployKrepysh.ps1 -path \"{path}\" -name \"{Projects[ProjectsListBox.SelectedIndex].Name}\"",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    using (Process deployProcess = new Process { StartInfo = startInfo })
+                    {
+                        deployProcess.Start();
+                        deployProcess.WaitForExit();
+                    }
+                    StatusTextBlock.Text = "Deployment completed.";
+                    ProcessStartInfo edgeInfo = new ProcessStartInfo
+                    {
+                        FileName = edgePath,
+                        Arguments = $"https://w29dq7t4-80.euw.devtunnels.ms/public/{SanitizeFileName(Projects[ProjectsListBox.SelectedIndex].Name)}",
+                        CreateNoWindow = true,
+                        UseShellExecute = false
+                    };
+                    using (Process edgeProcess = new Process { StartInfo = edgeInfo})
+                    {
+                        edgeProcess.Start();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    StatusTextBlock.Text = ex.Message;
+                }
+            }
+        }
+
+        private string SanitizeFileName(string? fileName)
+        {
+            if (fileName == null)
+            {
+                return string.Empty;
+            }
+            return Regex.Replace(fileName, @"[^a-zA-Z0-9_-]", "_");
         }
     }
 
