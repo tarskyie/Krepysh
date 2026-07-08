@@ -16,6 +16,7 @@ namespace KrepyshMgr
 
         private string DataFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\projects.json");
         private string PrefsFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Krepysh\\preferences.json");
+        private string KrepyshCloudAddress = "https://pbgrpfrm-8000.euw.devtunnels.ms";
         public ObservableCollection<ProjectItem> Projects { get; } = new();
 
         public MainWindow()
@@ -25,6 +26,7 @@ namespace KrepyshMgr
             ProjectsListBox.SelectionChanged += ProjectsListBox_SelectionChanged;
             LoadProjects();
             UpdateStatus();
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
         }
 
         private void ProjectsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -239,7 +241,7 @@ namespace KrepyshMgr
             }
         }
 
-        private void DeployButtonKrepysh_Click(object sender, RoutedEventArgs e)
+        private async void DeployButtonKrepysh_Click(object sender, RoutedEventArgs e)
         {
             string? path = Projects[ProjectsListBox.SelectedIndex].Path;
             if (path != null && Directory.Exists(path))
@@ -250,22 +252,20 @@ namespace KrepyshMgr
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
                         FileName = "pwsh",
-                        Arguments = $"{AppContext.BaseDirectory}\\deployKrepysh.ps1 -path \"{path}\" -name \"{Projects[ProjectsListBox.SelectedIndex].Name}\"",
+                        Arguments = $"deployKrepysh.ps1 -path \"{path}\" -name \"{Projects[ProjectsListBox.SelectedIndex].Name}\" -address {KrepyshCloudAddress}",
                         CreateNoWindow = true,
                         UseShellExecute = false
                     };
                     using (Process deployProcess = new Process { StartInfo = startInfo })
                     {
                         deployProcess.Start();
-                        deployProcess.WaitForExit();
+                        await deployProcess.WaitForExitAsync();
                     }
                     StatusTextBlock.Text = "Deployment completed.";
                     ProcessStartInfo edgeInfo = new ProcessStartInfo
                     {
                         FileName = edgePath,
-                        Arguments = $"https://w29dq7t4-80.euw.devtunnels.ms/public/{SanitizeFileName(Projects[ProjectsListBox.SelectedIndex].Name)}",
-                        CreateNoWindow = true,
-                        UseShellExecute = false
+                        Arguments = $"{KrepyshCloudAddress}/public/{SanitizeFileName(Projects[ProjectsListBox.SelectedIndex].Name)}"
                     };
                     using (Process edgeProcess = new Process { StartInfo = edgeInfo})
                     {

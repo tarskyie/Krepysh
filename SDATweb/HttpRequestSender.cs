@@ -22,7 +22,7 @@ namespace SDATweb
                 var messages = new List<Dictionary<string, string>>
                 {
                     new Dictionary<string, string> { ["role"] = "system", ["content"] = systemPrompt },
-                    new Dictionary<string, string> { ["role"] = "user", ["content"] = prompt }
+                    new Dictionary<string, string> { ["role"] = "user", ["content"] = prompt + "\nCurrent code: " + previousMarkup }
                 };
 
                 string accumulatedReply = string.Empty;

@@ -1,6 +1,7 @@
 param (
     [string]$path = (Join-Path -Path ([Environment]::GetFolderPath('MyDocuments')) -ChildPath "Krepysh\site"),
     [string]$name = ""
+    [string]$address = "https://pbgrpfrm-8000.euw.devtunnels.ms"
 )
 
 Set-Location $path
@@ -11,6 +12,6 @@ if (!($name -eq "")) {
 }
 Compress-Archive -Path ".\*" -DestinationPath ".\$BaseName.zip" -Force
 
-curl.exe -F "file=@$BaseName.zip" https://w29dq7t4-80.euw.devtunnels.ms/upload
+curl.exe -F "file=@$BaseName.zip" $address
 Write-Host "file=@$BaseName.zip"
 Write-Host "success"
